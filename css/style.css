@@ -1,0 +1,87 @@
+#droptarget {
+    float: left;
+    width: 200px;
+    height: 35px;
+    margin: 55px;
+    margin-top: 155px;
+    padding: 10px;
+    border: 1px solid #aaaaaa;
+}
+.modal-title{
+    font-size:12px !important;
+}
+.questionParentContainer{
+    width:70%;
+    margin:0 auto;
+    padding-top:20px;
+    border: 1px solid #dddddd
+}
+input[type=text], select {
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align:center;
+    font-style:bold
+}
+.choiceTableContainer{
+    font-family: arial, sans-serif;
+    font-size:12px;
+    border-collapse: collapse;
+    width:75%;
+    margin:0 auto;
+}
+
+.choiceTableContainer td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+
+}
+.crossButton{
+    background-color: orange;
+    color: white;
+    padding: 7px 10px;
+    margin: 4px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size:12px;
+}
+.btnClass{
+
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 8px;
+    margin: 2px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size:12px;
+}
+.questionLabel{
+    color:DodgerBlue;
+    padding-left:10px;
+    font-size:12px
+}
+.removeBtn{
+    background-color: orange;
+    color: white;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size:8px;
+    margin: 4px 0;
+    font-weight:bold
+}
+
+.symbolClass{
+    font-size:15px;
+    font-weight:bold;
+    margin-right:10px;
+    width: 25px;
+    height:25px;
+    float: left;
+    border: 1px solid black;
+    text-align: center;
+}

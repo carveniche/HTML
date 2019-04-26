@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Question Builder</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="js/operations.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+
+
+</head>
+<body>
+<div ng-app="questionBuilder" ng-controller="myCtrl">
+
+    <div class="questionParentContainer">
+        <div class='questionContainer'>
+            <!-- Button trigger modal -->
+            <button style="margin-left:10px"type="button"
+                    ng-click="validationCheck()"
+                    class="btn btn-primary"  data-target="#exampleModal">
+                Preview
+            </button>
+            <br>
+            <table style="width:50%">
+                <tr>
+                    <td>
+                        <span class="questionLabel">Question Type:</span>
+                    </td>
+                    <td>
+                        <select ng-options="i for i in qsType" style="font-size:14px;width:50%" ng-model="questionMetaData.qsTypeSelected">
+
+                        </select>
+                    </td>
+                </tr>
+                <tr ng-show="questionMetaData.qsTypeSelected == 'Multiplication'">
+                    <td>
+                        <span class="questionLabel">Multiplication Type:</span>
+                    </td>
+                    <td>
+                        <select ng-options="i for i in multiplicationType" style="font-size:14px;width:50%" ng-model="questionMetaData.multiplicationType">
+
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="questionLabel">Choice Type:</span>
+                    </td>
+                    <td>
+                        <select ng-options="i for i in choiceType" style="font-size:14px;width:50%" ng-model="questionMetaData.choiceTypeSelected">
+
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="questionLabel">Question Title:</span>
+                    </td>
+                    <td>
+
+                        <div id="testing" contentEditable=true ng-model="questionMetaData.title"
+                             style="border:1px solid black;font-size:12px;width:100%;height:100px" >
+                        </div>
+
+                    </td>
+                    <td>
+                        <button class='btnClass' ng-click='showIconModalPopup()'>Add Icons</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="questionLabel">Question:</span>
+                    </td>
+                    <td>
+                        <button class='btnClass' ng-click='addRow()'>Add Row</button>
+                        <button class='btnClass' ng-click='addColumn()'>Add column</button>
+                        <button class='btnClass' ng-click='addSolution()'>Add solution</button>
+                    </td>
+                </tr>
+            </table>
+
+
+            <div style="width:70%;margin:0 auto;padding-top:20px;max-height:200px;overflow:auto">
+                <table width="100%" >
+                    <tr ng-repeat="x in ritems">
+                        <td style="vertical-align: text-top">
+                            <!--<br>-->
+                            <button ng-click="removeRow(x)" class='removeBtn' >X</button>
+                        </td>
+                        <td  ng-repeat="y in x.cols">
+                            <!-- <button class='removeBtn' >X</button><br>-->
+                            <input type="text"
+                                   ng-model='y.value'
+                                   ng-keypress="limitKeypress($event,y.value)"
+                                   style="width:50px;height:40px"/><br>
+
+                            <input ng-show="questionMetaData.choiceTypeSelected == 'Multi Select'"
+                                   name="multiselect"
+                                   type="radio"
+                                   ng-click='checkboxClick(x,y)'>
+
+                            <input ng-hide = "questionMetaData.choiceTypeSelected == 'Multi Select'" type="checkbox" ng-click='checkboxClick(x,y)' ng-checked='y.checked' /><span style="font-size:10px">Is missed ?</span>
+                        <br>
+                            <button  class='removeBtn' ng-click="showSymbolModalPopup(y)" >S</button>
+                        <td>
+                        <td>
+                        <input type="text"
+                               ng-model='x.hint'
+                               placeholder="Hint"
+                               style="height:19px;width:100%"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="choiceContainer" ng-show="choiceVisibility()" style="padding-top:20px">
+            <span class="questionLabel">Choices:</span>
+            <div style="width:100%;max-height:200px;overflow:auto;margin-bottom:20px">
+                <table class="choiceTableContainer">
+                    <tr>
+                        <td>Choices</td>
+                        <td>Answer</td>
+                        <td>Add choice</td>
+                    </tr>
+
+                    <tr ng-repeat='r in choices'>
+                        <td>
+                            <input type='text'ng-model='r.choice'>
+                        </td>
+                        <td>
+                            <input ng-show="questionMetaData.choiceTypeSelected == 'Multi Select'" name = "ch"type="radio" ng-model="r.answer">
+                            <input ng-hide="questionMetaData.choiceTypeSelected == 'Multi Select'" type="checkbox" ng-model='r.answer'/>
+
+                        </td>
+                        <td>
+                            <button ng-if= "r.index == 1"class='btnClass' ng-click='addChoice()'>Add Choice</button>
+                            <button ng-if="r.index>1" class='crossButton'>X</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="text-align:center;width:100%" id="exampleModalLabel">{{questionMetaData.title}}</h5>
+                    <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                     </button>-->
+                </div>
+                <div class="modal-body" style="background-color:lightblue">
+                    <div style='width:70%;margin:0 auto;background-color:white'>
+                        <table width="100%">
+                            <tr ng-repeat="x in ritems">
+                                <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
+                                    <span ng-if='y.checked == false'>{{y.value}}</span>
+                                    <input span ng-if ='y.checked == true' type='text'id="y.value" ondrop="drop(event)" ondragover="allowDrop(event)" style='height:30px;width:30px;border:1px dotted purple'/>
+                                <td>
+                                <td>
+                                <span style="font-size:11px;font-weight:bold">{{x.hint}}</span>
+                            </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+                <div class='modal-footer' style='background-color:white;margin-top:20px'>
+
+
+                    <table style='width:100%'>
+
+                        <tr>
+                            <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat='r in choices'>
+
+                                <p style='text-align:center;width:50px;height:50px;border:2px solid purple' ondragstart="dragStart(event)" draggable="true" id="dragtarget"+$index>{{r.choice}}</p>
+
+                            </td>
+
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="symbolModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" style="width:200px" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="text-align:center;width:100%" >Select Symbol</h5>
+                </div>
+                <div class="modal-body">
+                    <div style='width:70%;margin:0 auto;'>
+                        <div ng-click="selectSymbol('&#43')" class="symbolClass">&#43</div>
+                        <div ng-click="selectSymbol('&#61')" class="symbolClass">&#61</div>
+                        <div ng-click="selectSymbol('&times')"class="symbolClass">&times</div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="iconModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="text-align:center;width:100%" >Select Icon</h5>
+                </div>
+                <div class="modal-body">
+                    <div style='width:70%;margin:0 auto;'>
+                        <div style="float:left;margin-right:5px" ng-repeat = 'm in images'>
+                            <a style="cursor: pointer"><img ng-src="{{m}}" ng-click="insertImg(m)"  height="35px" width="35px"></a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
