@@ -18,14 +18,29 @@
 
     <div class="questionParentContainer">
         <div class='questionContainer'>
+
             <!-- Button trigger modal -->
-            <button style="margin-left:10px"type="button"
+            <button
+                    type="button"
                     ng-click="validationCheck()"
                     class="btn btn-primary"  data-target="#exampleModal">
                 Preview
             </button>
-            <br>
-            <table style="width:50%">
+            <!-- Button trigger modal -->
+            <button
+                    type="button"
+                    ng-click="onSubmit()"
+                    class="btn btn-primary">
+                Submit
+            </button>
+            <button class="btn btn-secondary" ng-click='addSolution()'>
+                Add solution
+            </button>
+
+
+            <div style="margin-top:30px">
+                <h6 class="headerStyle">Question</h6>
+                <table style="width:50%">
                 <tr>
                     <td>
                         <span class="questionLabel">Question Type:</span>
@@ -62,8 +77,8 @@
                     </td>
                     <td>
 
-                        <div id="testing" contentEditable=true ng-model="questionMetaData.title"
-                             style="border:1px solid black;font-size:12px;width:100%;height:100px" >
+                        <div id="questionTitle" contentEditable=true ng-model="questionMetaData.title"
+                             style="border-radius:5px;border:1px solid lightgrey;font-size:12px;width:100%;height:100px" >
                         </div>
 
                     </td>
@@ -78,18 +93,17 @@
                     <td>
                         <button class='btnClass' ng-click='addRow()'>Add Row</button>
                         <button class='btnClass' ng-click='addColumn()'>Add column</button>
-                        <button class='btnClass' ng-click='addSolution()'>Add solution</button>
                     </td>
                 </tr>
             </table>
-
+            </div>
 
             <div style="width:70%;margin:0 auto;padding-top:20px;max-height:200px;overflow:auto">
                 <table width="100%" >
                     <tr ng-repeat="x in ritems">
                         <td style="vertical-align: text-top">
                             <!--<br>-->
-                            <button ng-click="removeRow(x)" class='removeBtn' >X</button>
+                            <button ng-click="removeRow(x,ritems)" class='removeBtn' >X</button>
                         </td>
                         <td  ng-repeat="y in x.cols">
                             <!-- <button class='removeBtn' >X</button><br>-->
@@ -116,10 +130,49 @@
                     </tr>
                 </table>
             </div>
+
+        <div class="solutionContainer" ng-show="solutionVisibility">
+            <h6 class="headerStyle">Solution</h6>
+
+            <span class="questionLabel">Solution Type:</span>
+
+            <select ng-options="s for s in solutionType" style="font-size:14px;width:20%" ng-model="questionMetaData.solutionType">
+
+            </select>
+            <!-- Below code execute when solution type is model-->
+            <button ng-if="questionMetaData.solutionType == 'Model'"class='btnClass' ng-click='addSolutionLine()'>Add solution Line</button>
+            <!-- Below code execute when solution type is Side By Side-->
+
+            <button ng-if="questionMetaData.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionRow()'>Add Row</button>
+            <button ng-if="questionMetaData.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionCol()'>Add column</button>
+            <div style="width:60%;height:200px;margin:0 auto;padding-bottom:10px">
+                <div ng-if="questionMetaData.solutionType == 'Model'" ng-repeat="s in solutionContent"><label class="questionLabel">Line{{$index+1}}:</label><input type="text" style="width:70%" ng-model="s.value"></div><br>
+                <table width="70%" >
+                    <tr ng-repeat="x in solutionRows">
+                        <td style="vertical-align: text-top;width:20%">
+                            <!--<br>-->
+                            <button ng-click="removeRow(x,solutionRows)" class='removeBtn' >X</button>
+                        </td>
+                        <td  ng-repeat="y in x.cols">
+                            <!-- <button class='removeBtn' >X</button><br>-->
+                            <input type="text"
+                                   ng-model='y.value'
+                                   ng-keypress="limitKeypress($event,y.value)"
+                                   style="width:50px;height:40px"/><br>
+                            <button  class='removeBtn' ng-click="showSymbolModalPopup(y)" >S</button>
+                        <td>
+
+                    </tr>
+                </table>
+
+
+            </div>
+            <br>
         </div>
 
-
         <div class="choiceContainer" ng-show="choiceVisibility()" style="padding-top:20px">
+            <h6 class="headerStyle">Choices</h6>
+
             <span class="questionLabel">Choices:</span>
             <div style="width:100%;max-height:200px;overflow:auto;margin-bottom:20px">
                 <table class="choiceTableContainer">
@@ -156,13 +209,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" style="text-align:center;width:100%" id="exampleModalLabel">{{questionMetaData.title}}</h5>
-                    <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                         <span aria-hidden="true">&times;</span>
-                     </button>-->
                 </div>
                 <div class="modal-body" style="background-color:lightblue">
                     <div style='width:70%;margin:0 auto;background-color:white'>
-                        <table width="100%">
+                        <table ng-style='getDataTableStyle()'>
                             <tr ng-repeat="x in ritems">
                                 <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
                                     <span ng-if='y.checked == false'>{{y.value}}</span>
@@ -171,6 +221,20 @@
                                 <td>
                                 <span style="font-size:11px;font-weight:bold">{{x.hint}}</span>
                             </td>
+                            </tr>
+                        </table>
+                        <table ng-if="questionMetaData.solutionType == 'Model'" style="margin:0 auto;width:50%" >
+                            <tr ng-repeat="x in solutionContent">
+                               <td >
+                                   {{x.value}}
+                               </td>
+                            </tr>
+                        </table>
+                        <table ng-if="questionMetaData.solutionType == 'Side By Side'"  style="width:30%;float:right">
+                            <tr ng-repeat="x in solutionRows">
+                                <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
+                                    {{y.value}}
+                                <td>
                             </tr>
                         </table>
                     </div>
