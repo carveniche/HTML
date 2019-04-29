@@ -19,6 +19,8 @@ app.controller("myCtrl", function($scope) {
     $scope.symbols = [{value:'&copy'},{value:'+'},{value:'='}];
     $scope.selectedColForSymbol = {};
     $scope.solutionVisibility = false;
+    $scope.title = '';
+    $scope.submitBtnDisabled = true;
     $scope.questionMetaData = {
         choiceTypeSelected:"Select",
         qsTypeSelected:"Select",
@@ -26,20 +28,47 @@ app.controller("myCtrl", function($scope) {
         title:"",
         solutionType:""
     };
-    $scope.solutionType = ['Model','Side By Side'];
+    $scope.solutionType = ['Select','Model','Side By Side'];
     $scope.solutionContent = [];
     $scope.solutionCols = [];
     $scope.solutionRows = [];
+    $scope.selectedElementForIcon = '';
+    $scope.solutionArray = [{solutionType:'Select',solutionContent:[],solutionRows:[],solutionCols:[]}];
+    var dataObj = {};
+
+    $scope.createFinalDataObj = function(){
+        dataObj = {
+            "operation":$scope.questionMetaData.qsTypeSelected,
+            "additionTypes":$scope.questionMetaData.multiplicationType,
+            "questionName":$("#questionTitle").html(),
+            "questionContent":[],
+            "choices":[],
+            "choiceType":$scope.questionMetaData.choiceTypeSelected,
+            "choiceCount":""};
+        for(var x=0;x<$scope.ritems.length;x++){
+            for(var y=0;y<$scope.ritems[x].cols.length;y++){
+                dataObj.questionContent.push({
+                    "row":x+1,
+                    "col":y+1,
+                    "value":$scope.ritems[x].cols[y].value,
+                    "isMissed":$scope.ritems[x].cols[y].checked
+                })
+            };
+
+        };
+
+    }
+
     $scope.populateChoiceArray = function(){
         var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
+
         if(choiceSelected == 'Multi Select'){
-            if($scope.choices.length==0){
+            if($scope.choices.length==1 && $scope.choices[0].choice==''){
                 alert('Please add atleast one choice');
-                return;
+                return false;
             }
         };
-        if(choiceSelected == 'Drag And Drop'){
-            for(var i=0;i<$scope.ritems.length;i++){
+        for(var i=0;i<$scope.ritems.length;i++){
                 var colArray = $scope.ritems[i].cols;
                 for(var x=0;x<colArray.length;x++){
                     if(colArray[x].checked == true){
@@ -52,16 +81,20 @@ app.controller("myCtrl", function($scope) {
                             });
                             if(isValueEmpty){
                                 isValueEmpty.choice =colArray[x].value;
+                                isValueEmpty.answer = true;
                             }else{
-                                $scope.choices.push({choice:colArray[x].value,answer:''});
+                                $scope.choices.push({choice:colArray[x].value,answer:true});
                             }
 
                         }
                     }
                 }
-            }
-
+            };
+        for(var i=0;i<$scope.choices.length;i++){
+            dataObj.choices.push($scope.choices[i].choice);
         };
+        dataObj.choiceCount = dataObj.choices.length;
+        return true;
     };
     $scope.getColumnData=function(colData,rowData){
         var colArray = [];
@@ -111,8 +144,50 @@ app.controller("myCtrl", function($scope) {
         return true;
     };
     $scope.validationCheck = function(){
-        $scope.populateChoiceArray();
-        $('#exampleModal').modal('show');
+        
+        $scope.questionMetaData.title = $("#questionTitle").html();
+        var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
+        $scope.createFinalDataObj();
+        var missedElements = [];
+        //Validating the data
+        dataObj.questionContent.forEach(function(element) {
+            if (element.isMissed == true){
+                missedElements.push(element.value);
+            };
+        });
+        if($scope.questionMetaData.qsTypeSelected == '' || $scope.questionMetaData.qsTypeSelected == 'Select'){
+            alert('Please select Question Type');
+            return;
+        };
+        if($scope.questionMetaData.multiplicationType == '' || $scope.questionMetaData.multiplicationType == 'Select'){
+            alert('Please select Multiplication Type');
+            return;
+        };
+        if(choiceSelected == '' || choiceSelected == 'Select'){
+            alert('Please Select Choice Type');
+            return;
+        };
+
+        if(missedElements.length==0){
+            alert('Please select atleast one value as missed');
+            return;
+        };
+        var choiceRepeated = false;
+        $scope.choices.forEach(function(element){
+            var x = missedElements.includes(element.choice);
+            if(x){
+                alert('Please do not add missed value as choice');
+                choiceRepeated =true;
+                return;
+            };
+
+        });
+        if(!choiceRepeated){
+            var status = $scope.populateChoiceArray();
+            if(status)
+            $('#exampleModal').modal('show');
+        };
+
     };
     $scope.limitKeypress = function($event,value){
         if($scope.questionMetaData.multiplicationType == 'Vertical'){
@@ -124,28 +199,29 @@ app.controller("myCtrl", function($scope) {
     $scope.addSolution = function(){
         $scope.solutionVisibility = true;
     };
-    $scope.addSolutionLine = function(){
-        $scope.solutionContent.push({value:""});
+    $scope.addSolutionLine = function(obj){
+       obj.solutionContent.push({value:""});
     };
-    $scope.addSolutionRow = function(){
-        if($scope.solutionCols.length == 0){
-            $scope.solutionCols.push({col1:$scope.solutionCols.length+"-"+$scope.solutionRows.length,value:''});
+    $scope.addSolutionRow = function(obj){
+        if(obj.solutionCols.length == 0){
+            obj.solutionCols.push({col1:obj.solutionCols.length+"-"+obj.solutionRows.length,value:''});
 
         }
-        $scope.solutionRows.push({row1:$scope.solutionRows.length,
-            cols:$scope.getColumnData($scope.solutionCols,$scope.solutionRows)});
+        obj.solutionRows.push({row1:obj.solutionRows.length,
+            cols:$scope.getColumnData(obj.solutionCols,obj.solutionRows)});
     };
-    $scope.addSolutionCol = function(){
-        $scope.solutionCols.push({col1:$scope.solutionCols.length+"-"+$scope.solutionRows.length,value:''});
-        for(var i=0;i<$scope.solutionRows.length;i++){
-            $scope.solutionRows[i].cols.push({col1:$scope.solutionCols.length+"-"+$scope.solutionRows[i].row1,value:'',})
+    $scope.addSolutionCol = function(obj){
+        obj.solutionCols.push({col1:obj.solutionCols.length+"-"+obj.solutionRows.length,value:''});
+        for(var i=0;i<obj.solutionRows.length;i++){
+            obj.solutionRows[i].cols.push({col1:obj.solutionCols.length+"-"+obj.solutionRows[i].row1,value:'',})
         };
     }
     $scope.showSymbolModalPopup = function(col){
         $scope.selectedColForSymbol = col;
         $('#symbolModal').modal('show');
     };
-    $scope.showIconModalPopup = function(){
+    $scope.showIconModalPopup = function(elemId){
+        $scope.selectedElementForIcon = elemId;
         $('#iconModal').modal('show');
     };
     $scope.selectSymbol = function(val){
@@ -155,36 +231,10 @@ app.controller("myCtrl", function($scope) {
     $scope.insertImg = function(url){
         var x = document.createElement("IMG");
         x.setAttribute("src", url);
-        document.getElementById("questionTitle").appendChild(x);
+        document.getElementById($scope.selectedElementForIcon).appendChild(x);
         $('#iconModal').modal('hide');
     };
-
-
     $scope.onSubmit = function(){
-        $scope.populateChoiceArray();
-        var dataObj = {
-            "operation":$scope.questionMetaData.qsTypeSelected,
-            "additionTypes":$scope.questionMetaData.multiplicationType,
-            "questionName":$scope.questionMetaData.title,
-            "questionContent":[],
-            "choices":[],
-            "choiceType":$scope.questionMetaData.choiceTypeSelected,
-            "choiceCount":""};
-        for(var x=0;x<$scope.ritems.length;x++){
-            for(var y=0;y<$scope.ritems[x].cols.length;y++){
-                dataObj.questionContent.push({
-                    "row":x+1,
-                    "col":y+1,
-                    "value":$scope.ritems[x].cols[y].value,
-                    "isMissed":$scope.ritems[x].cols[y].checked
-                })
-            };
-
-        };
-        for(var i=0;i<$scope.choices.length;i++){
-            dataObj.choices.push($scope.choices[i].choice);
-        };
-        dataObj.choiceCount = dataObj.choices.length;
     };
     $scope.getDataTableStyle = function(){
         if($scope.questionMetaData.solutionType == 'Side By Side'){
@@ -192,7 +242,9 @@ app.controller("myCtrl", function($scope) {
         }else{
             return{width:'100%'}
         }
-
-    }
+    };
+    $scope.addMoreSolution = function(){
+        $scope.solutionArray.push({solutionType:'Select',solutionContent:[],solutionRows:[],solutionCols:[]});
+    };
 
 })
