@@ -34,10 +34,12 @@ app.controller("myCtrl", function($scope) {
     $scope.solutionRows = [];
     $scope.selectedElementForIcon = '';
     $scope.solutionArray = [{solutionType:'Select',solutionContent:[],solutionRows:[],solutionCols:[]}];
-    var dataObj = {};
+    $scope.dataObj = {};
 
     $scope.createFinalDataObj = function(){
-        dataObj = {
+        $scope.dataObj = {
+            "modelSolutionContent":{},
+            "sidebysideSolutionContent":{},
             "operation":$scope.questionMetaData.qsTypeSelected,
             "additionTypes":$scope.questionMetaData.multiplicationType,
             "questionName":$("#questionTitle").html(),
@@ -47,7 +49,7 @@ app.controller("myCtrl", function($scope) {
             "choiceCount":""};
         for(var x=0;x<$scope.ritems.length;x++){
             for(var y=0;y<$scope.ritems[x].cols.length;y++){
-                dataObj.questionContent.push({
+                $scope.dataObj.questionContent.push({
                     "row":x+1,
                     "col":y+1,
                     "value":$scope.ritems[x].cols[y].value,
@@ -56,6 +58,15 @@ app.controller("myCtrl", function($scope) {
             };
 
         };
+
+        $scope.solutionArray.forEach(function(obj){
+            if(obj.solutionType == 'Model'){
+                $scope.dataObj.modelSolutionContent = obj;
+
+            }else if(obj.solutionType == 'Side By Side'){
+                $scope.dataObj.sidebysideSolutionContent = obj;
+            }
+        })
 
     }
 
@@ -91,9 +102,9 @@ app.controller("myCtrl", function($scope) {
                 }
             };
         for(var i=0;i<$scope.choices.length;i++){
-            dataObj.choices.push($scope.choices[i].choice);
+            $scope.dataObj.choices.push($scope.choices[i].choice);
         };
-        dataObj.choiceCount = dataObj.choices.length;
+        $scope.dataObj.choiceCount = $scope.dataObj.choices.length;
         return true;
     };
     $scope.getColumnData=function(colData,rowData){
@@ -150,7 +161,7 @@ app.controller("myCtrl", function($scope) {
         $scope.createFinalDataObj();
         var missedElements = [];
         //Validating the data
-        dataObj.questionContent.forEach(function(element) {
+     /*   $scope.dataObj.questionContent.forEach(function(element) {
             if (element.isMissed == true){
                 missedElements.push(element.value);
             };
@@ -171,15 +182,15 @@ app.controller("myCtrl", function($scope) {
         if(missedElements.length==0){
             alert('Please select atleast one value as missed');
             return;
-        };
+        };*/
         var choiceRepeated = false;
         $scope.choices.forEach(function(element){
             var x = missedElements.includes(element.choice);
-            if(x){
+          /*  if(x){
                 alert('Please do not add missed value as choice');
                 choiceRepeated =true;
                 return;
-            };
+            };*/
 
         });
         if(!choiceRepeated){
@@ -189,18 +200,61 @@ app.controller("myCtrl", function($scope) {
         };
 
     };
-    $scope.limitKeypress = function($event,value){
-        if($scope.questionMetaData.multiplicationType == 'Vertical'){
-            if (value != undefined && value.length>0) {
+    $scope.limitKeypress = function($event,obj,row,sol,id){
+        var regex = new RegExp("^[a-zA-a]+$");
+        var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
+        if(!sol){
+            if (regex.test(str)) {
                 $event.preventDefault();
-            }
+                return false;
+            }else if($scope.questionMetaData.multiplicationType == 'Vertical'){
+
+                if (obj.value != undefined && obj.value.length>0) {
+                    $event.preventDefault();
+                    return false;
+                }
+            };
         }
+
+
+        if(sol){
+            if(sol.solutionType == 'Side By Side'){
+                $scope.solutionArray.forEach(function(elem){
+                    if(elem.solutionType == sol.solutionType){
+                        elem.solutionRows.forEach(function(elemrow){
+                            if(elemrow.row1 == row.row1){
+                                elemrow.cols.forEach(function(elemcol){
+                                    if(elemcol.col1 == obj.col1){
+                                        elemcol.value = str;
+                                    }
+                                })
+                            }
+
+                        })
+                    }
+                })
+            }
+            else if(sol.solutionType == 'Model'){
+                $scope.solutionArray.forEach(function(elem){
+                    if(elem.solutionType == sol.solutionType){
+                        elem.solutionContent.forEach(function(data){
+                            if(data.line == obj.line ){
+                                data.value =  $("#"+id).html();
+                            }
+                        })
+                    }})
+            }
+
+        }
+
+
+
     };
     $scope.addSolution = function(){
         $scope.solutionVisibility = true;
     };
-    $scope.addSolutionLine = function(obj){
-       obj.solutionContent.push({value:""});
+    $scope.addSolutionLine = function(obj,idx){
+       obj.solutionContent.push({value:"",line: obj.solutionContent.length});
     };
     $scope.addSolutionRow = function(obj){
         if(obj.solutionCols.length == 0){
@@ -216,7 +270,9 @@ app.controller("myCtrl", function($scope) {
             obj.solutionRows[i].cols.push({col1:obj.solutionCols.length+"-"+obj.solutionRows[i].row1,value:'',})
         };
     }
-    $scope.showSymbolModalPopup = function(col){
+    $scope.showSymbolModalPopup = function(col,type,id,row){
+        col.type = type;
+        col.row=row;
         $scope.selectedColForSymbol = col;
         $('#symbolModal').modal('show');
     };
@@ -225,7 +281,35 @@ app.controller("myCtrl", function($scope) {
         $('#iconModal').modal('show');
     };
     $scope.selectSymbol = function(val){
-        $scope.selectedColForSymbol.value = val;
+        if($scope.selectedColForSymbol.type == 'M'){
+            $scope.solutionArray.forEach(function(elem){
+                if(elem.solutionType == 'Model'){
+                    elem.solutionContent.forEach(function(data){
+                        if(data.line == $scope.selectedColForSymbol.line ){
+                            var str = $("#line"+$scope.selectedColForSymbol.line).html()+val;
+                            data.value =  str;
+                            var e = document.getElementById('line'+$scope.selectedColForSymbol.line);
+                            e.innerHTML = str;
+                        }
+                    })
+                }})
+        }else if($scope.selectedColForSymbol.type == 'S'){
+            $scope.solutionArray.forEach(function(elem){
+                if(elem.solutionType == 'Side By Side'){
+                    elem.solutionRows.forEach(function(elemrow){
+                        if(elemrow.row1 == $scope.selectedColForSymbol.row){
+                            elemrow.cols.forEach(function(elemcol){
+                                if(elemcol.col1 == $scope.selectedColForSymbol.col1){
+                                    elemcol.value = val;
+                                }
+                            })
+                        }
+
+                    })
+                }
+            })
+        }
+        //$scope.selectedColForSymbol.value = val;
         $('#symbolModal').modal('hide');
     };
     $scope.insertImg = function(url){
@@ -237,7 +321,10 @@ app.controller("myCtrl", function($scope) {
     $scope.onSubmit = function(){
     };
     $scope.getDataTableStyle = function(){
-        if($scope.questionMetaData.solutionType == 'Side By Side'){
+        if($scope.dataObj&&
+            $scope.dataObj.sidebysideSolutionContent
+            &&
+            $scope.dataObj.sidebysideSolutionContent.solutionType == 'Side By Side'){
             return{width:'30%',float:'left'}
         }else{
             return{width:'100%'}
