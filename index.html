@@ -19,7 +19,6 @@
 
     <div class="questionParentContainer">
         <div class='questionContainer'>
-
             <!-- Button trigger modal -->
             <button
                     type="button"
@@ -107,7 +106,7 @@
                             <!-- <button class='removeBtn' >X</button><br>-->
                             <input type="text"
                                    ng-model='y.value'
-                                   ng-keypress="limitKeypress($event,y.value)"
+                                   ng-keypress="limitKeypress($event,y)"
                                    style="width:50px;height:40px"/><br>
 
                             <input ng-show="questionMetaData.choiceTypeSelected == 'Multi Select'"
@@ -172,15 +171,15 @@
                         <td  ng-repeat="y in x.cols">
                             <div
 
-                                   ng-attr-id="{{'box'+$index}}"
+                                   ng-attr-id="{{'box'+$index+y.col1}}"
                                    contenteditable="true"
                                    ng-keypress="limitKeypress($event,y,x,sol)"
-                                   style="width:50px;height:40px;border:1px solid lightgrey">
+                                   style="text-align:center;width:50px;height:40px;border:1px solid lightgrey">
 
                             </div>
                             <br>
-                            <button  class='removeBtn' ng-click="showSymbolModalPopup(y,'S','box'+$index,x.row1)" >S</button>
-                            <button class='removeBtn' ng-click='showIconModalPopup("box"+$index)'>I</button>
+                            <button  class='removeBtn' ng-click="showSymbolModalPopup(y,'S','box'+$index+y.col1,x.row1)" >S</button>
+                            <button class='removeBtn' ng-click='showIconModalPopup("box"+$index+y.col1)'>I</button>
 
                         <td>
 
@@ -216,7 +215,7 @@
                         </td>
                         <td>
                             <button ng-if= "r.index == 1"class='btnClass' ng-click='addChoice()'>Add Choice</button>
-                            <button ng-if="r.index>1" class='crossButton'>X</button>
+                            <button ng-if="r.index>1" ng-click="removeChoice(r)" class='crossButton'>X</button>
                         </td>
                     </tr>
                 </table>
@@ -231,7 +230,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" style="text-align:center;width:100%" id="exampleModalLabel">{{questionMetaData.title}}</h5>
+                    <h5 class="modal-title" style="text-align:center;width:100%" id="exampleModalLabel">{{dataObj.questionName}}</h5>
                 </div>
                 <div class="modal-body" style="background-color:lightblue">
                     <div style='width:70%;margin:0 auto;background-color:white'>
