@@ -36,6 +36,7 @@ app.controller("myCtrl", function($scope) {
     $scope.solutionArray = [{solutionType:'Select',solutionContent:[],solutionRows:[],solutionCols:[]}];
     $scope.dataObj = {};
     $scope.questionTitleContents = [];
+
     $scope.createFinalDataObj = function(){
         $scope.dataObj = {
             "modelSolutionContent":{},
@@ -66,10 +67,10 @@ app.controller("myCtrl", function($scope) {
             }else if(obj.solutionType == 'Side By Side'){
                 $scope.dataObj.sidebysideSolutionContent = obj;
             }
-        })
+        });
+        $scope.creatingModelSolution();
 
-    }
-
+    };
     $scope.populateChoiceArray = function(){
         var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
 
@@ -145,7 +146,7 @@ app.controller("myCtrl", function($scope) {
         for(var i=0;i<$scope.ritems.length;i++){
             $scope.ritems[i].cols.push({col1:$scope.citems.length+"-"+$scope.ritems[i].row1,value:'',checked:false})
         };
-    }
+    };
     $scope.addChoice = function(){
         $scope.choices.push({choice:'',answer:'',index:999});
     };
@@ -160,6 +161,9 @@ app.controller("myCtrl", function($scope) {
         var found = dataArray.findIndex(function(element) {
             return element.row1 == obj.row1;
         });
+        if(dataArray.length==1){
+            $scope.citems = [];
+        };
         dataArray.splice(found,1);
     };
     $scope.choiceVisibility = function(){
@@ -170,35 +174,12 @@ app.controller("myCtrl", function($scope) {
         return true;
     };
     $scope.appendQuesTitle = function(){
-        $scope.questionTitleContents = [];
-        var c = $scope.questionMetaData.title.split("<");
-
-        c.forEach(function(data){
-            if(data.includes('>')){
-                var d = data.split('>');
-                d.forEach(function(elem){
-                    $scope.questionTitleContents.push(elem);
-                })
-            }else{
-                $scope.questionTitleContents.push(data);
-            }
-        });
-
-        var x = document.getElementById('exampleModalLabel');
-        x.innerHTML = '';
-        $scope.questionTitleContents.forEach(function(ob){
-            if(ob.includes('img')){
-                var src = ob.split("=");
-                src[1] = src[1].replace (/(^")|("$)/g, '');
-                var p = document.createElement("IMG");
-                p.setAttribute("src", src[1]);
-                x.appendChild(p);
-            }else{
-                x.innerHTML = x.innerHTML + ob;
-            }
-
-        })
+        var titleBody = '<span>';
+        titleBody += $scope.questionMetaData.title;
+        titleBody += '</span>';
+        $('#exampleModalLabel').html(titleBody);
     };
+
     $scope.validationCheck = function(){
 
         $scope.dataObj = {};
@@ -276,6 +257,7 @@ app.controller("myCtrl", function($scope) {
                                 elemrow.cols.forEach(function(elemcol){
                                     if(elemcol.col1 == obj.col1){
                                         elemcol.value = str;
+                                        elemcol.type='text';
                                     }
                                 })
                             }
@@ -319,7 +301,7 @@ app.controller("myCtrl", function($scope) {
         for(var i=0;i<obj.solutionRows.length;i++){
             obj.solutionRows[i].cols.push({col1:obj.solutionCols.length+"-"+obj.solutionRows[i].row1,value:'',})
         };
-    }
+    };
     $scope.showSymbolModalPopup = function(col,type,id,row){
         col.type = type;
         col.row=row;
@@ -327,8 +309,17 @@ app.controller("myCtrl", function($scope) {
         $scope.selectedColForSymbol = col;
         $('#symbolModal').modal('show');
     };
-    $scope.showIconModalPopup = function(elemId){
-        $scope.selectedElementForIcon = elemId;
+    $scope.showIconModalPopup = function(elemId,col,type,row){
+        if(col){
+            col.type = type;
+            col.row=row;
+            col.id=elemId;
+            $scope.selectedElementForIcon = col;
+        }else{
+            $scope.selectedElementForIcon = {};
+            $scope.selectedElementForIcon.id = elemId;
+        }
+
         $('#iconModal').modal('show');
     };
     $scope.selectSymbol = function(val){
@@ -369,7 +360,38 @@ app.controller("myCtrl", function($scope) {
     $scope.insertImg = function(url){
         var x = document.createElement("IMG");
         x.setAttribute("src", url);
-        document.getElementById($scope.selectedElementForIcon).appendChild(x);
+        x.setAttribute("width", '25px');
+        x.setAttribute("height", '25px');
+        document.getElementById($scope.selectedElementForIcon.id).appendChild(x);
+
+        if($scope.selectedElementForIcon.type == 'S'){
+            $scope.solutionArray.forEach(function(elem){
+                if(elem.solutionType == 'Side By Side'){
+                    elem.solutionRows.forEach(function(elemrow){
+                        if(elemrow.row1 == $scope.selectedElementForIcon.row){
+                            elemrow.cols.forEach(function(elemcol){
+                                if(elemcol.col1 == $scope.selectedElementForIcon.col1){
+                                    elemcol.value = url;
+                                    elemcol.type = 'img';
+                                }
+                            })
+                        }
+
+                    })
+                }
+            })
+        }else if($scope.selectedElementForIcon.type == 'M'){
+            $scope.solutionArray.forEach(function(elem){
+                if(elem.solutionType == 'Model'){
+                    elem.solutionContent.forEach(function(data){
+                        if(data.line == $scope.selectedElementForIcon.line ){
+                            var str = $("#line"+$scope.selectedElementForIcon.line).html();
+                            data.value =  str;
+                        }
+                    })
+                }})
+        }
+
         $('#iconModal').modal('hide');
     };
     $scope.onSubmit = function(){
@@ -392,6 +414,24 @@ app.controller("myCtrl", function($scope) {
             return (element.choice == obj.choice && element.answer == obj.answer);
         });
         $scope.choices.splice(found,1);
-    }
+    };
+    $scope.creatingModelSolution = function(){
+        if($scope.dataObj.modelSolutionContent){
+            if($scope.dataObj.modelSolutionContent.solutionContent){
+                var data = $scope.dataObj.modelSolutionContent.solutionContent;
+                var table_body = '<table style="margin:0 auto;width:50%">';
+                for(var i=0;i<data.length;i++){
+                    table_body+='<tr>';
+                        table_body +='<td>';
+                        table_body += data[i].value;
+                        table_body +='</td>';
+                    table_body+='</tr>';
+                }
+                table_body+='</table>';
+                $('#modelSolutionContent').html(table_body);
+            }
+        }
+    };
+
 
 })
