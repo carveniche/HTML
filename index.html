@@ -145,7 +145,7 @@
 
                 <button ng-if="sol.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionRow(sol)'>Add Row</button>
                 <button ng-if="sol.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionCol(sol)'>Add column</button>
-                <div style="width:60%;height:200px;margin:0 auto;padding-bottom:10px">
+                <div style="width:60%;height:200px;margin:0 auto;padding-bottom:10px;overflow:auto">
                 <div ng-if="sol.solutionType == 'Model'" ng-repeat="s in sol.solutionContent">
                     <span>
                     <label class="questionLabel">Line{{$index+1}}:</label>
@@ -158,7 +158,7 @@
                     </div>
                     <span>
                         <button  class='removeBtn' ng-click="showSymbolModalPopup(s,'M')" >S</button>
-                        <button class='removeBtn' ng-click='showIconModalPopup("line"+$index)'>I</button>
+                        <button class='removeBtn' ng-click='showIconModalPopup("line"+$index,s,"M")'>I</button>
                     </span>
                     </span>
                 </div><br>
@@ -179,7 +179,7 @@
                             </div>
                             <br>
                             <button  class='removeBtn' ng-click="showSymbolModalPopup(y,'S','box'+$index+y.col1,x.row1)" >S</button>
-                            <button class='removeBtn' ng-click='showIconModalPopup("box"+$index+y.col1)'>I</button>
+                            <button class='removeBtn' ng-click='showIconModalPopup("box"+$index+y.col1,y,"S",x.row1)'>I</button>
 
                         <td>
 
@@ -250,19 +250,21 @@
                         <table ng-if="dataObj.sidebysideSolutionContent.solutionType == 'Side By Side'"  style="width:30%;float:right">
                             <tr ng-repeat="x in dataObj.sidebysideSolutionContent.solutionRows">
                                 <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
-                                    {{y.value}}
+                                    <span ng-if="y.type=='text'||y.type=='S'">{{y.value}}</span>
+                                    <span ng-if="y.type=='img'"><img width="30px" height="30px"ng-src="{{y.value}}"/></span>
+
                                 <td>
                             </tr>
                         </table>
                     </div>
-                    <div>
-                        <table  style="margin:0 auto;width:50%" >
+                    <div id="modelSolutionContent">
+                       <!-- <table  style="margin:0 auto;width:50%" >
                             <tr ng-repeat="x in dataObj.modelSolutionContent.solutionContent">
                                 <td >
                                     {{x.value}}
                                 </td>
                             </tr>
-                        </table>
+                        </table>-->
                     </div>
                     <div>
                         <table style='width:100%'>
