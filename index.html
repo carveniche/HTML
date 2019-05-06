@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <title>Question Builder</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="js/operations.js"></script>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
-
-
-
 </head>
 <body>
 <div ng-app="questionBuilder" ng-controller="myCtrl">
@@ -97,6 +97,13 @@
 
             <div style="width:70%;margin:0 auto;padding-top:20px;max-height:200px;overflow:auto">
                 <table width="100%" >
+                    <tr>
+                        <td>
+                        </td>
+                        <td ng-repeat = 'col in ritems[0].cols'>
+                            <button ng-click="removeCol($index)"  class='removeBtn'>X</button>
+                        </td>
+                    </tr>
                     <tr ng-repeat="x in ritems">
                         <td style="vertical-align: text-top">
                             <!--<br>-->
@@ -132,20 +139,29 @@
             <h6 class="headerStyle">Solution</h6>
             <button class="btnClass" style="margin-left:10px" ng-click="addMoreSolution()">Add More</button>
             <div ng-repeat="sol in solutionArray">
-                <span class="questionLabel">Solution Type:</span>
+                <table style="width:60%">
+                    <tr>
+                        <td width="25%">
+                            <span class="questionLabel">Solution Type:</span>
+                        </td>
+                        <td width="25%">
+                            <select ng-options="s for s in solutionType"
+                                    style="font-size:14px;width:100%"
+                                    ng-model="sol.solutionType"> </select>
+                        </td>
+                        <td>
+                            <!-- Below code execute when solution type is model-->
+                            <button ng-if="sol.solutionType == 'Model'"class='btnClass' ng-click='addSolutionLine(sol)'>Add solution Line</button>
+                            <!-- Below code execute when solution type is Side By Side-->
 
-                <select ng-options="s for s in solutionType"
-                        style="font-size:14px;width:20%"
-                        ng-model="sol.solutionType">
+                            <button ng-if="sol.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionRow(sol)'>Add Row</button>
+                            <button ng-if="sol.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionCol(sol)'>Add column</button>
 
-            </select>
-            <!-- Below code execute when solution type is model-->
-                <button ng-if="sol.solutionType == 'Model'"class='btnClass' ng-click='addSolutionLine(sol)'>Add solution Line</button>
-            <!-- Below code execute when solution type is Side By Side-->
+                        </td>
+                    </tr>
+                </table>
 
-                <button ng-if="sol.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionRow(sol)'>Add Row</button>
-                <button ng-if="sol.solutionType == 'Side By Side'" class='btnClass' ng-click='addSolutionCol(sol)'>Add column</button>
-                <div style="width:60%;height:200px;margin:0 auto;padding-bottom:10px;overflow:auto">
+           <div style="width:60%;height:200px;margin:0 auto;padding-bottom:10px;overflow:auto">
                 <div ng-if="sol.solutionType == 'Model'" ng-repeat="s in sol.solutionContent">
                     <span>
                     <label class="questionLabel">Line{{$index+1}}:</label>
@@ -232,13 +248,24 @@
                 <div class="modal-header">
                     <h5 class="modal-title" style="text-align:center;width:100%" id="exampleModalLabel">{{dataObj.questionName}}</h5>
                 </div>
-                <div class="modal-body" style="background-color:lightblue">
+                <div class="modal-body">
                     <div style='width:70%;margin:0 auto;background-color:white'>
                         <table ng-style='getDataTableStyle()'>
                             <tr ng-repeat="x in ritems">
                                 <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
                                     <span ng-if='y.checked == false'>{{y.value}}</span>
-                                    <input span ng-if ='y.checked == true' type='text'id="y.value" ondrop="drop(event)" ondragover="allowDrop(event)" style='height:30px;width:30px;border:1px dotted purple'/>
+                                    <input span ng-if ="y.checked == true && questionMetaData.choiceTypeSelected!='Drag And Drop'"
+                                           type='text'
+                                           ng-model="y.answer"
+                                           id="y.value"
+                                          class="emptyBox"
+                                          ng-disabled="questionMetaData.choiceTypeSelected == 'Multi Select'"/>
+                                    <div class="emptyBox"
+                                         ng-attr-id="{{'data'+y.value}}"
+                                         ng-if="y.checked == true && questionMetaData.choiceTypeSelected=='Drag And Drop'">
+                                        <p></p>
+                                    </div>
+
                                 <td>
                                 <td>
                                 <span style="font-size:11px;font-weight:bold">{{x.hint}}</span>
@@ -247,7 +274,7 @@
                         </table>
 
 
-                        <table ng-if="dataObj.sidebysideSolutionContent.solutionType == 'Side By Side'"  style="width:30%;float:right">
+                        <table ng-if="dataObj.sidebysideSolutionContent.solutionType == 'Side By Side'" ng-show="showSidebysideSolutionContent" style="width:30%;float:right">
                             <tr ng-repeat="x in dataObj.sidebysideSolutionContent.solutionRows">
                                 <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
                                     <span ng-if="y.type=='text'||y.type=='S'">{{y.value}}</span>
@@ -257,25 +284,23 @@
                             </tr>
                         </table>
                     </div>
-                    <div id="modelSolutionContent">
-                       <!-- <table  style="margin:0 auto;width:50%" >
-                            <tr ng-repeat="x in dataObj.modelSolutionContent.solutionContent">
-                                <td >
-                                    {{x.value}}
-                                </td>
-                            </tr>
-                        </table>-->
+                    <div id="modelSolutionContent" ng-show="showModelSolutionContent">
+
                     </div>
-                    <div>
+                    <div ng-show="choiceVisibility()" style="margin-top:20px">
+
+
                         <table style='width:100%'>
 
-                            <tr>
-                                <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat='r in choices'>
-
-                                    <p style='text-align:center;width:50px;height:50px;border:2px solid purple' >{{r.choice}}</p>
-
+                            <tr >
+                                <td class="choiceTd" ng-repeat='r in choices'>
+                                    <div   class="choiceStyle" >
+                                        <div ng-attr-id="{{'choice'+r.choice}}">
+                                            <p  ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'"> {{r.choice}}</p>
+                                            <span ng-if="questionMetaData.choiceTypeSelected == 'Multi Select'" ng-click = 'choiceSelected(r)'> {{r.choice}}</span>
+                                        </div>
+                                    </div>
                                 </td>
-
                             </tr>
                         </table>
                     </div>
@@ -293,7 +318,7 @@
 
                     <button
                             type="button"
-                            ng-click=""
+                            ng-click="verifyTheAnswer()"
                             class="btn btn-success">
                         Verify
                     </button>
