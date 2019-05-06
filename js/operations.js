@@ -36,8 +36,11 @@ app.controller("myCtrl", function($scope) {
     $scope.solutionArray = [{solutionType:'Select',solutionContent:[],solutionRows:[],solutionCols:[]}];
     $scope.dataObj = {};
     $scope.questionTitleContents = [];
+    $scope.showModelSolutionContent = false;
+    $scope.showSidebysideSolutionContent = false;
 
     $scope.createFinalDataObj = function(){
+
         $scope.dataObj = {
             "modelSolutionContent":{},
             "sidebysideSolutionContent":{},
@@ -107,6 +110,7 @@ app.controller("myCtrl", function($scope) {
                                 isValueEmpty.answer = true;
                             }else{
                                 $scope.choices.push({choice:colArray[x].value,answer:true});
+
                             }
 
                         }
@@ -133,7 +137,7 @@ app.controller("myCtrl", function($scope) {
     }
     $scope.addRow = function(){
         if($scope.citems.length == 0){
-            $scope.citems.push({col1:$scope.citems.length+"-"+$scope.ritems.length,value:'',checked:false});
+            $scope.citems.push({col1:$scope.citems.length+"-"+$scope.ritems.length,value:'',checked:false,answer:""});
 
         }
         $scope.ritems.push({row1:$scope.ritems.length,
@@ -142,9 +146,9 @@ app.controller("myCtrl", function($scope) {
 
     };
     $scope.addColumn = function(){
-        $scope.citems.push({col1:$scope.citems.length+"-"+$scope.ritems.length,value:'',checked:false});
+        $scope.citems.push({col1:$scope.citems.length+"-"+$scope.ritems.length,value:'',checked:false,answer:""});
         for(var i=0;i<$scope.ritems.length;i++){
-            $scope.ritems[i].cols.push({col1:$scope.citems.length+"-"+$scope.ritems[i].row1,value:'',checked:false})
+            $scope.ritems[i].cols.push({col1:$scope.citems.length+"-"+$scope.ritems[i].row1,value:'',checked:false,answer:""})
         };
     };
     $scope.addChoice = function(){
@@ -179,7 +183,6 @@ app.controller("myCtrl", function($scope) {
         titleBody += '</span>';
         $('#exampleModalLabel').html(titleBody);
     };
-
     $scope.validationCheck = function(){
 
         $scope.dataObj = {};
@@ -225,6 +228,8 @@ app.controller("myCtrl", function($scope) {
             var status = $scope.populateChoiceArray();
             if(status){
                 $scope.appendQuesTitle();
+                if(choiceSelected == 'Drag And Drop')
+                $scope.addDragableEements();
                 $('#exampleModal').modal('show');
 
             }
@@ -432,6 +437,76 @@ app.controller("myCtrl", function($scope) {
             }
         }
     };
+    $scope.addDragableEements = function(){
+        $scope.choices.forEach(function(ob){
+            $("#choice"+ob.choice).draggable();
+            $("#choice"+ob.choice).draggable({
+                revert: "invalid",
+                helper: "clone",
+            });
+        });
+
+        $scope.ritems.forEach(function(row){
+            row.cols.forEach(function(col){
+                if(col.checked == true){
+                    $( "#data"+col.value ).droppable({
+                        activeClass: "ui-state-default",
+                        hoverClass: "ui-state-hover",
+                        drop: function( event, ui ) {
+                            $(this).empty();
+                            ui.draggable.clone().appendTo($(this));
+                            var val = $(ui.draggable).attr("id");
+                            col.answer = document.getElementById(val).innerHTML;
+
+                        }
+                    })
+                }
+            })
+        })
+
+    };
+    $scope.choiceSelected = function(ch){
+        ch.selected = ch.choice;
+        if( $scope.questionMetaData.choiceTypeSelected == 'Multi Select'){
+            $scope.ritems.forEach(function(row){
+                row.cols.forEach(function(col){
+                    if(col.checked == true){
+                        col.answer = ch.choice;
+                    }
+                })
+            })
+        }
+        $('#choice'+ch.choice).addClass('choiceSelected');
+    };
+    $scope.removeCol = function(idx){
+        $scope.ritems.forEach(function(row){
+            row.cols.splice(idx,1);
+        });
+        $scope.citems.splice(idx,1);
+    };
+    $scope.verifyTheAnswer = function(){
+        var verified = true;
+        var wrongAns = [];
+        $scope.ritems.forEach(function(row){
+            row.cols.forEach(function(col){
+                if(col.checked == true){
+                    if(col.answer != col.value){
+                        wrongAns.push(col.answer);
+                    };
+                }
+            });
+
+
+        });
+        if(wrongAns.length>0){
+            alert('Entered Value is incorrect');
+            $scope.showModelSolutionContent = true;
+            $scope.showSidebysideSolutionContent =true;
+
+        }else{
+            $scope.submitBtnDisabled = false;
+        }
+    }
 
 
 })
