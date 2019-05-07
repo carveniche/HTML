@@ -94,7 +94,7 @@ app.controller("myCtrl", function($scope) {
                 alert('Please remove duplicate choices');
                 return false;
             };
-            for(var i=0;i<$scope.ritems.length;i++){
+            /*for(var i=0;i<$scope.ritems.length;i++){
                 var colArray = $scope.ritems[i].cols;
                 for(var x=0;x<colArray.length;x++){
                     if(colArray[x].checked == true){
@@ -116,7 +116,7 @@ app.controller("myCtrl", function($scope) {
                         }
                     }
                 }
-            };
+            };*/
             for(var i=0;i<$scope.choices.length;i++){
                 $scope.dataObj.choices.push($scope.choices[i].choice);
             };
@@ -155,11 +155,54 @@ app.controller("myCtrl", function($scope) {
         $scope.choices.push({choice:'',answer:'',index:999});
     };
     $scope.checkboxClick = function(val,idx){
+        var obj = idx;
+        var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
+        if(choiceSelected == 'Multi Select'){
+            $scope.ritems.forEach(function(row){
+                    row.cols.forEach(function(col){
+                        if(col.col1 != obj.col1){
+                            col.checked = false;
+                            var idx = $scope.choices.findIndex(function(element) {
+                                return (col.value == element.choice && element.answer == true);
+                            });
+                            if(idx != -1)
+                                $scope.choices.splice(idx,1);
+                        }
+
+                    })
+            })
+        }
         var found = $scope.ritems.find(function(element) {
             return element.row1 == val.row1;
         });
         var col = found.cols.find(function(ele){return ele.col1==idx.col1});
         col.checked=col.checked==true?false:true;
+        if(col.checked){
+            var isValueEmpty = $scope.choices.find(function(element) {
+                return element.choice == '';
+            });
+
+            if(isValueEmpty){
+                isValueEmpty.choice = col.value;
+                isValueEmpty.answer = true;
+            }else{
+                $scope.choices.push({choice:col.value,answer:true,index:999});
+            }
+        }else{
+            var idx = $scope.choices.findIndex(function(element) {
+                return (col.value == element.choice && element.answer == true);
+            });
+            if(idx != -1){
+                if($scope.choices[idx].index ==1){
+                    $scope.choices[idx].choice="";
+                    $scope.choices[idx].answer =false;
+                }else{
+                    $scope.choices.splice(idx,1);
+                }
+            }
+
+        };
+
     };
     $scope.removeRow = function(obj,dataArray){
         var found = dataArray.findIndex(function(element) {
@@ -217,11 +260,11 @@ app.controller("myCtrl", function($scope) {
         var choiceRepeated = false;
         $scope.choices.forEach(function(element){
             var x = missedElements.includes(element.choice);
-            if(x){
+           /* if(x){
                 alert('Please do not add missed value as choice');
                 choiceRepeated =true;
                 return;
-            };
+            };*/
 
         });
         if(!choiceRepeated){
@@ -439,8 +482,9 @@ app.controller("myCtrl", function($scope) {
     };
     $scope.addDragableEements = function(){
         $scope.choices.forEach(function(ob){
-            $("#choice"+ob.choice).draggable();
-            $("#choice"+ob.choice).draggable({
+            //$("#choice"+ob.choice).draggable()gab
+            $(".dummy").draggable();
+            $(".dummy").draggable({
                 revert: "invalid",
                 helper: "clone",
             });
@@ -475,7 +519,13 @@ app.controller("myCtrl", function($scope) {
                     }
                 })
             })
-        }
+        };
+        $scope.choices.forEach(function(ob){
+            var classValid = $('#choice'+ob.choice).hasClass("choiceSelected");
+            if(classValid){
+                $('#choice'+ob.choice).removeClass("choiceSelected");
+            };
+        })
         $('#choice'+ch.choice).addClass('choiceSelected');
     };
     $scope.removeCol = function(idx){
@@ -487,9 +537,13 @@ app.controller("myCtrl", function($scope) {
     $scope.verifyTheAnswer = function(){
         var verified = true;
         var wrongAns = [];
+        var emptyAns = [];
         $scope.ritems.forEach(function(row){
             row.cols.forEach(function(col){
                 if(col.checked == true){
+                    if(col.answer == ""){
+                        emptyAns.push(true);
+                    }
                     if(col.answer != col.value){
                         wrongAns.push(col.answer);
                     };
@@ -498,7 +552,10 @@ app.controller("myCtrl", function($scope) {
 
 
         });
-        if(wrongAns.length>0){
+        if(emptyAns.length>0){
+            alert('Please enter values in empty box');
+        }
+        else if(wrongAns.length>0){
             alert('Entered Value is incorrect');
             $scope.showModelSolutionContent = true;
             $scope.showSidebysideSolutionContent =true;
@@ -506,6 +563,32 @@ app.controller("myCtrl", function($scope) {
         }else{
             $scope.submitBtnDisabled = false;
         }
+    };
+    $scope.previewKeyPress = function($event){
+        var regex = new RegExp("^[a-zA-a]+$");
+        var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
+        if (regex.test(str)) {
+            $event.preventDefault();
+            return false;
+        };
+        return true;
+    };
+    $scope.removeSolutionLine = function(arg1,arg2){
+        if(arg2.solutionType == 'Model'){
+            var idx= arg2.solutionContent.findIndex(function(elem){
+                return (elem.line == arg1.line)
+            });
+            if(idx!= -1){
+                arg2.solutionContent.splice(idx,1)
+            }
+        }
+            var x = 'fsf';
+    };
+    $scope.disableAddCol = function(){
+        if($scope.ritems.length>0){
+            return false;
+        };
+        return true;
     }
 
 
