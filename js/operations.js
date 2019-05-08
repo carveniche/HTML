@@ -94,29 +94,7 @@ app.controller("myCtrl", function($scope) {
                 alert('Please remove duplicate choices');
                 return false;
             };
-            /*for(var i=0;i<$scope.ritems.length;i++){
-                var colArray = $scope.ritems[i].cols;
-                for(var x=0;x<colArray.length;x++){
-                    if(colArray[x].checked == true){
-                        var found = $scope.choices.find(function(element) {
-                            return element.choice == colArray[x].value;
-                        });
-                        if(!found){
-                            var isValueEmpty = $scope.choices.find(function(element) {
-                                return element.choice == '';
-                            });
-                            if(isValueEmpty){
-                                isValueEmpty.choice =colArray[x].value;
-                                isValueEmpty.answer = true;
-                            }else{
-                                $scope.choices.push({choice:colArray[x].value,answer:true});
 
-                            }
-
-                        }
-                    }
-                }
-            };*/
             for(var i=0;i<$scope.choices.length;i++){
                 $scope.dataObj.choices.push($scope.choices[i].choice);
             };
@@ -137,7 +115,10 @@ app.controller("myCtrl", function($scope) {
     }
     $scope.addRow = function(){
         if($scope.citems.length == 0){
-            $scope.citems.push({col1:$scope.citems.length+"-"+$scope.ritems.length,value:'',checked:false,answer:""});
+            $scope.citems.push({
+                col1:$scope.citems.length+"-"+$scope.ritems.length,
+                value:'',checked:false,
+                answer:""});
 
         }
         $scope.ritems.push({row1:$scope.ritems.length,
@@ -351,11 +332,25 @@ app.controller("myCtrl", function($scope) {
         };
     };
     $scope.showSymbolModalPopup = function(col,type,id,row){
-        col.type = type;
-        col.row=row;
-        col.id=id;
-        $scope.selectedColForSymbol = col;
-        $('#symbolModal').modal('show');
+        var flag = true;
+        if($scope.questionMetaData.multiplicationType == 'Vertical' && type=='Q'){
+            var found = $scope.ritems.find(function(element) {
+                return element.row1 == row.row1;
+            });
+            var colIndex = found.cols.findIndex(function(ele){return ele.col1==col.col1});
+            if(colIndex != 0){
+                flag=false;
+            }
+        };
+        if(flag){
+            col.type = type;
+            col.row=row;
+            col.id=id;
+            $scope.selectedColForSymbol = col;
+            $('#symbolModal').modal('show');
+        }
+
+
     };
     $scope.showIconModalPopup = function(elemId,col,type,row){
         if(col){
@@ -401,8 +396,10 @@ app.controller("myCtrl", function($scope) {
                     })
                 }
             })
-        }
+        };
         $scope.selectedColForSymbol.value = val;
+
+
         $('#symbolModal').modal('hide');
     };
     $scope.insertImg = function(url){
@@ -589,6 +586,21 @@ app.controller("myCtrl", function($scope) {
             return false;
         };
         return true;
+    };
+    $scope.checkForCondition = function(row,col){
+        if($scope.questionMetaData.multiplicationType == 'Vertical'){
+            if((col.col1 == "0-0" )){
+                return true;
+            }
+            /*if($scope.ritems.length>1){
+                $scope.ritems.forEach(function(row){
+                    row.cols.forEach(function(col){
+
+                    })
+                })
+            }*/
+        };
+        return false;
     }
 
 
