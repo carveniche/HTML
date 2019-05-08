@@ -114,6 +114,7 @@
                             <input type="text"
                                    ng-model='y.value'
                                    ng-keypress="limitKeypress($event,y)"
+                                   ng-disabled="checkForCondition(x,y)"
                                    style="width:50px;height:40px"/><br>
 
                             <input ng-show="questionMetaData.choiceTypeSelected == 'Multi Select'"
@@ -123,7 +124,7 @@
 
                             <input ng-hide = "questionMetaData.choiceTypeSelected == 'Multi Select'" type="checkbox" ng-click='checkboxClick(x,y)' ng-checked='y.checked' /><span style="font-size:10px">Is missed ?</span>
                         <br>
-                            <button  class='removeBtn' ng-click="showSymbolModalPopup(y,'Q')" >S</button>
+                            <button  class='removeBtn' ng-click="showSymbolModalPopup(y,'Q','',x)" >S</button>
                         <td>
                         <td>
                         <input type="text"
@@ -163,6 +164,7 @@
 
            <div style="width:69%;height:200px;margin:0 auto;padding-bottom:10px;overflow:auto">
                 <div ng-if="sol.solutionType == 'Model'" ng-repeat="s in sol.solutionContent">
+                    <br>
                     <div style="float:left">
                         <button  class='removeBtn' ng-click="removeSolutionLine(s,sol)" >X</button>
                     <label class="questionLabel">Line{{$index+1}}:</label>
@@ -289,8 +291,8 @@
                             </tr>
                         </table>
                     </div>
-                    <div id="modelSolutionContent" ng-show="showModelSolutionContent">
-
+                    <div id="modelSolutionContent"
+                         ng-show="showModelSolutionContent">
                     </div>
                     <div ng-show="choiceVisibility()" style="margin-top:20px">
 
