@@ -11,7 +11,7 @@
     font-size:12px !important;
 }
 .questionParentContainer{
-    width:70%;
+    width:80%;
     margin:0 auto;
     padding-top:20px;
     border: 1px solid #dddddd
@@ -61,7 +61,7 @@ input[type=text], select {
 .questionLabel{
     color:DodgerBlue;
     padding-left:10px;
-    font-size:12px
+    font-size:11px
 }
 .removeBtn{
     background-color: orange;
@@ -94,7 +94,8 @@ input[type=text], select {
     border-radius:5px;
     border:1px solid lightgrey;
     font-size:12px;
-    width:100%;height:100px
+    width:100%;
+    height:100px
 }
 .choiceStyle{
     text-align:center;
@@ -114,4 +115,9 @@ input[type=text], select {
     height:40px;
     width:40px;
     border:1px dotted purple
+}
+.dropdownStyle{
+    font-size:12px;
+    width:170px;
+    margin-left:10px
 }
