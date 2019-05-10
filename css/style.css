@@ -11,10 +11,9 @@
     font-size:12px !important;
 }
 .questionParentContainer{
-    width:80%;
+    width:90%;
     margin:0 auto;
     padding-top:20px;
-    border: 1px solid #dddddd
 }
 input[type=text], select {
     display: inline-block;
@@ -119,5 +118,6 @@ input[type=text], select {
 .dropdownStyle{
     font-size:12px;
     width:170px;
-    margin-left:10px
+    margin-left:10px;
+    height:25px
 }
