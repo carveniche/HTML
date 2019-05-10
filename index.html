@@ -175,6 +175,7 @@
                                 </button>
                                 <button ng-if="sol.solutionType == 'Side By Side'"
                                         class='btnClass'
+                                        ng-disabled="disableSolutionAddCol(sol)"
                                         ng-click='addSolutionCol(sol)'>Add column
                                 </button>
 
@@ -210,14 +211,23 @@
                         </div>
                         <br>
                         <table width="70%">
+                            <tr>
+                                <td>
+                                </td>
+                                <td ng-repeat='col in sol.solutionRows[0].cols'>
+                                    <button ng-click="removeSolutionCol($index,sol.solutionRows)" class='removeBtn'>X
+                                    </button>
+                                </td>
+                            </tr>
                             <tr ng-repeat="x in sol.solutionRows">
                                 <td style="vertical-align: text-top;width:20%">
                                     <!--<br>-->
-                                    <button ng-click="removeRow(x,sol.solutionRows)" class='removeBtn'>X</button>
+                                    <button ng-click="removeRow(x,sol.solutionRows)"
+                                            class='removeBtn'>X
+                                    </button>
                                 </td>
                                 <td ng-repeat="y in x.cols">
                                     <div
-
                                             ng-attr-id="{{'box'+$index+y.col1}}"
                                             contenteditable="true"
                                             ng-keypress="limitKeypress($event,y,x,sol)"
@@ -232,7 +242,7 @@
                                             ng-click='showIconModalPopup("box"+$index+y.col1,y,"S",x.row1)'>I
                                     </button>
 
-                                <td>
+                                </td>
 
                             </tr>
                         </table>
