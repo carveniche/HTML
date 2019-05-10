@@ -295,19 +295,18 @@ app.controller("myCtrl", function ($scope) {
     $scope.limitKeypress = function ($event, obj, row, sol, id) {
         var regex = new RegExp("^[a-zA-a]+$");
         var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
-        if (!sol) {
-            if (regex.test(str)) {
+
+        if (regex.test(str)) {
+            $event.preventDefault();
+            return false;
+        } else if ($scope.questionMetaData.multiplicationType == 'Vertical' && !sol) {
+
+            if (obj.value != undefined && obj.value.length > 0) {
                 $event.preventDefault();
                 return false;
-            } else if ($scope.questionMetaData.multiplicationType == 'Vertical') {
-
-                if (obj.value != undefined && obj.value.length > 0) {
-                    $event.preventDefault();
-                    return false;
-                }
             }
-            ;
         }
+        ;
 
 
         if (sol) {
@@ -332,7 +331,7 @@ app.controller("myCtrl", function ($scope) {
                     if (elem.solutionType == sol.solutionType) {
                         elem.solutionContent.forEach(function (data) {
                             if (data.line == obj.line) {
-                                data.value = $("#" + id).html();
+                                data.value = $("#" + id).html() + str;
                             }
                         })
                     }
@@ -573,8 +572,12 @@ app.controller("myCtrl", function ($scope) {
     $scope.removeCol = function (idx) {
         $scope.ritems.forEach(function (row) {
             row.cols.splice(idx, 1);
+
         });
         $scope.citems.splice(idx, 1);
+        if ($scope.ritems[0].cols.length == 0) {
+            $scope.ritems = [];
+        }
     };
     $scope.verifyTheAnswer = function () {
         var verified = true;
@@ -643,6 +646,26 @@ app.controller("myCtrl", function ($scope) {
         }
         ;
         return false;
+    };
+    $scope.removeSolutionCol = function (idx, array) {
+        array.forEach(function (row) {
+            row.cols.splice(idx, 1);
+        });
+        if (array[0].cols.length == 0) {
+            $scope.solutionArray.forEach(function (sol) {
+                if (sol.solutionType == 'Side By Side') {
+                    sol.solutionRows = [];
+                    sol.solutionCols = [];
+                }
+            })
+        }
+    };
+    $scope.disableSolutionAddCol = function (obj) {
+        if (obj.solutionRows.length > 0) {
+            return false;
+        }
+        ;
+        return true;
     }
 
 
