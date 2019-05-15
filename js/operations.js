@@ -1,4 +1,22 @@
-var app = angular.module("questionBuilder", []);
+var app = angular.module("questionBuilder",[]);
+
+/*
+app.config(function($stateProvider) {
+    $stateProvider.state("state1", {
+        url: "",
+        templateUrl: "templates/questionBuilder.html",
+        controller: "myCtrl",
+        params:{questionId:null}
+    }).state("questionList", {
+        url: "/questionList",
+        templateUrl: "templates/questionList.html",
+        params:{param1:null},
+        controller:"questionList"
+    });
+});
+*/
+
+
 app.controller("myCtrl", function ($scope) {
     $scope.ritems = [];
     $scope.citems = [];
@@ -46,7 +64,7 @@ app.controller("myCtrl", function ($scope) {
             "sidebysideSolutionContent": {},
             "operation": $scope.questionMetaData.qsTypeSelected,
             "additionTypes": $scope.questionMetaData.multiplicationType,
-            "questionName": "<img src=\'images/circle-blue.png\'>",//document.getElementById("questionTitle").innerHTML,
+            "questionName": $scope.questionMetaData.title,
             "questionContent": [],
             "choices": [],
             "choiceType": $scope.questionMetaData.choiceTypeSelected,
@@ -127,8 +145,7 @@ app.controller("myCtrl", function ($scope) {
                 value: '', checked: false,
                 answer: ""
             });
-
-        }
+        };
         $scope.ritems.push({
             row1: $scope.ritems.length,
             hint: "",
@@ -228,10 +245,10 @@ app.controller("myCtrl", function ($scope) {
         return true;
     };
     $scope.appendQuesTitle = function () {
-        var titleBody = '<span>';
+        var titleBody = '<div style="padding-top:8%">';
         titleBody += $scope.questionMetaData.title;
-        titleBody += '</span>';
-        $('#exampleModalLabel').html(titleBody);
+        titleBody += '</div>';
+        $('#questionName').html(titleBody);
     };
     $scope.validationCheck = function () {
 
@@ -482,6 +499,11 @@ app.controller("myCtrl", function ($scope) {
     $scope.onSubmit = function () {
         //Final data Object
         var dataJsonObj = $scope.dataObj;
+
+        var url = window.location.href;
+        if(!(url.includes("edit")))
+        window.location = url+"?edit=true";
+        $('#exampleModal').modal('hide');
     };
     $scope.getDataTableStyle = function () {
         if ($scope.dataObj &&
@@ -563,10 +585,12 @@ app.controller("myCtrl", function ($scope) {
         $scope.choices.forEach(function (ob) {
             var classValid = $('#choice' + ob.choice).hasClass("choiceSelected");
             if (classValid) {
+                $('#choiceDiv'+ob.choice).css("background-image","url('images/choices.png')");
                 $('#choice' + ob.choice).removeClass("choiceSelected");
             }
             ;
         })
+        $('#choiceDiv'+ch.choice).css("background-image","url('images/selected-option.png')");
         $('#choice' + ch.choice).addClass('choiceSelected');
     };
     $scope.removeCol = function (idx) {
@@ -666,7 +690,87 @@ app.controller("myCtrl", function ($scope) {
         }
         ;
         return true;
+    };
+    $scope.getStyleObj = function(){
+        if($scope.questionMetaData.choiceTypeSelected == 'Drag And Drop'){
+            return 'dragBox'
+        };
+        return 'choiceStyle'
     }
+    $scope.populateColData = function(){
 
+    }
+    $scope.init = function(){
+        var tempData = [];
+        var edit = window.location.href.split("?");
+
+       if(edit[1] == 'edit=true'){
+           //static code
+           var obj = {additionTypes: "Horizontal",
+           choiceCount: "",
+           choiceType: "Fill",
+           choices: [],
+           modelSolutionContent: {},
+           operation: "Multiplication",
+           questionContent:  [ {row: 1, col: 1, value: "1", isMissed: false},
+               {row: 1, col: 2, value: "2", isMissed: false},
+           {row: 1, col: 3, value: "3", isMissed: false},
+           {row: 1, col: 4, value: "4", isMissed: true}],
+           questionName: "hgfjd;kjfdg;fg",
+           sidebysideSolutionContent: {}};
+
+           $scope.title = obj.questionName;
+           $scope.questionMetaData['multiplicationType'] = obj.additionTypes;
+           $scope.questionMetaData['qsTypeSelected'] = obj.operation;
+           $scope.questionMetaData['choiceTypeSelected'] = obj.choiceType;
+
+           if(obj.questionContent && obj.questionContent.length>0){
+
+               obj.questionContent.forEach(function(qs){
+
+                   var rowObj = tempData.find(function(r){
+                       return(r.row1 == (qs.row-1))
+                   });
+                   if(!rowObj){
+
+                       tempData.push({row1:qs.row - 1,cols:[{col1:qs.col+"-"+qs.row,value:qs.value,checked:qs.isMissed}]});
+
+                   }else{
+
+                       rowObj.cols.push({col1:qs.col+"-"+qs.row,value:qs.value,checked:qs.isMissed})
+                   }
+               });
+               $scope.ritems = tempData;
+
+           };
+           $scope.ritems[0].cols.forEach(function(){
+               $scope.citems.push({
+                   col1:"",
+                   value: '',
+                   checked: false,
+                   answer: ""
+               });
+           });
+           $scope.choices = [];
+           if(obj.choices && obj.choices.length>0){
+
+               obj.choices.forEach(function(val){
+                   var idxValue = $scope.choices.length == 0?1:999;
+                   $scope.choices.push({choice:val, answer: '', index:idxValue});
+               })
+           };
+
+       }
+    }
+    $scope.init()
 
 })
+
+/*app.controller("questionList",function($scope,$state,$stateParams){
+    var x = $stateParams.param1;
+    $scope.questionList = [{questionName:"ABC",id:""}];
+    $scope.questionList.push({questionName:x.questionName});
+    $scope.editQuestion = function(){
+        $state.go('state1',{questionId:x})
+    }
+})*/
