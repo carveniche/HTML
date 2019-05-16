@@ -1,21 +1,5 @@
 var app = angular.module("questionBuilder",[]);
 
-/*
-app.config(function($stateProvider) {
-    $stateProvider.state("state1", {
-        url: "",
-        templateUrl: "templates/questionBuilder.html",
-        controller: "myCtrl",
-        params:{questionId:null}
-    }).state("questionList", {
-        url: "/questionList",
-        templateUrl: "templates/questionList.html",
-        params:{param1:null},
-        controller:"questionList"
-    });
-});
-*/
-
 
 app.controller("myCtrl", function ($scope) {
     $scope.ritems = [];
@@ -56,7 +40,15 @@ app.controller("myCtrl", function ($scope) {
     $scope.questionTitleContents = [];
     $scope.showModelSolutionContent = false;
     $scope.showSidebysideSolutionContent = false;
+    $scope.editMode = false;
 
+    function isEmpty(obj) {
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key))
+                return false;
+        }
+        return true;
+    };
     $scope.createFinalDataObj = function () {
 
         $scope.dataObj = {
@@ -83,6 +75,7 @@ app.controller("myCtrl", function ($scope) {
 
         }
         ;
+
 
         $scope.solutionArray.forEach(function (obj) {
             if (obj.solutionType == 'Model') {
@@ -171,6 +164,8 @@ app.controller("myCtrl", function ($scope) {
         ;
     };
     $scope.addChoice = function () {
+        if($scope.questionMetaData.choiceTypeSelected == 'Multi Select' && $scope.choices.length == 4)
+            return;
         $scope.choices.push({choice: '', answer: '', index: 999});
     };
     $scope.checkboxClick = function (val, idx) {
@@ -280,6 +275,20 @@ app.controller("myCtrl", function ($scope) {
             return;
         }
         ;
+        if($scope.questionMetaData.title == ''){
+            alert('Please provide Question Name');
+            return;
+        }
+        ;
+        if($scope.dataObj.questionContent.length==0){
+            alert('You have not created any question');
+            return;
+        }
+        ;
+        if($scope.solutionArray[0].solutionType=='Select'){
+            alert('Please provide atleast one solution for question');
+            return;
+        };
 
         if (missedElements.length == 0) {
             alert('Please select atleast one value as missed');
@@ -610,10 +619,10 @@ app.controller("myCtrl", function ($scope) {
         $scope.ritems.forEach(function (row) {
             row.cols.forEach(function (col) {
                 if (col.checked == true) {
-                    if (col.answer == "") {
+                    if (col.answer == "" || col.answer == undefined) {
                         emptyAns.push(true);
                     }
-                    if (col.answer != col.value) {
+                    if (col.answer && col.answer != col.value) {
                         wrongAns.push(col.answer);
                     }
                     ;
@@ -626,11 +635,21 @@ app.controller("myCtrl", function ($scope) {
             alert('Please enter values in empty box');
         } else if (wrongAns.length > 0) {
             alert('Entered Value is incorrect');
-            $scope.showModelSolutionContent = true;
-            $scope.showSidebysideSolutionContent = true;
+            if(isEmpty($scope.dataObj.modelSolutionContent)){
+                $scope.showModelSolutionContent = false;
+            }else{
+                $scope.showModelSolutionContent = true;
+            };
+
+            if(isEmpty($scope.dataObj.sidebysideSolutionContent)){
+                $scope.showSidebysideSolutionContent = false;
+            }else{
+                $scope.showSidebysideSolutionContent = true;
+            }
             document.getElementById('choicesContainer').style.display = "none";
 
         } else {
+            alert('Answer is correct');
             $scope.submitBtnDisabled = false;
         }
     };
@@ -696,33 +715,62 @@ app.controller("myCtrl", function ($scope) {
             return 'dragBox'
         };
         return 'choiceStyle'
-    }
-    $scope.populateColData = function(){
+    };
+    $scope.choiceTypeSelected = function(){
+        if($scope.editMode && $scope.questionMetaData.choiceTypeSelected !="Fill"){
+            $scope.ritems.forEach(function(ob){
+                ob.cols.forEach(function(col){
+                    if(col.checked){
+                        var idxValue = $scope.choices.length == 0?1:999;
+                        $scope.choices.push({choice:col.value, answer:true, index:idxValue});
+                    }
+                })
 
-    }
+            })
+        }
+    };
     $scope.init = function(){
         var tempData = [];
         var edit = window.location.href.split("?");
 
        if(edit[1] == 'edit=true'){
            //static code
+           $scope.editMode = true;
+
            var obj = {additionTypes: "Horizontal",
-           choiceCount: "",
-           choiceType: "Fill",
-           choices: [],
-           modelSolutionContent: {},
-           operation: "Multiplication",
-           questionContent:  [ {row: 1, col: 1, value: "1", isMissed: false},
+               choiceCount: 4,
+               choiceType: "Fill",
+               choices: []/*["8", "9", "10", "11"]*/,
+               modelSolutionContent: {solutionType: "Model",
+                   solutionContent:[ {value: "12234444444444444", line: 0, type: "M"}]},
+               operation: "Multiplication",
+               questionContent:  [{row: 1, col: 1, value: "1", isMissed: false},
                {row: 1, col: 2, value: "2", isMissed: false},
            {row: 1, col: 3, value: "3", isMissed: false},
-           {row: 1, col: 4, value: "4", isMissed: true}],
-           questionName: "hgfjd;kjfdg;fg",
+           {row: 1, col: 4, value: "4", isMissed: false},
+           {row: 2, col: 1, value: "5", isMissed: false},
+           {row: 2, col: 2, value: "6", isMissed: false},
+           {row: 2, col: 3, value: "7", isMissed: false},
+            {row: 2, col: 4, value: "8", isMissed: true}],
+           questionName: "This a question Title",
            sidebysideSolutionContent: {}};
-
+           var solutionPresent = (!(isEmpty(obj.modelSolutionContent))) || (!(isEmpty(obj.sidebysideSolutionContent)))?true:false;
+           if(solutionPresent){
+               $scope.solutionArray = [];
+           }
            $scope.title = obj.questionName;
            $scope.questionMetaData['multiplicationType'] = obj.additionTypes;
            $scope.questionMetaData['qsTypeSelected'] = obj.operation;
            $scope.questionMetaData['choiceTypeSelected'] = obj.choiceType;
+           if(!(isEmpty(obj.modelSolutionContent))){
+               $scope.solutionArray.push(obj.modelSolutionContent);
+               $scope.solutionVisibility = true;
+           };
+           if(!(isEmpty(obj.sidebysideSolutionContent))){
+               $scope.solutionArray.push(obj.sidebysideSolutionContent);
+               $scope.solutionVisibility = true;
+
+           };
 
            if(obj.questionContent && obj.questionContent.length>0){
 
@@ -761,16 +809,9 @@ app.controller("myCtrl", function ($scope) {
            };
 
        }
-    }
+    };
     $scope.init()
 
 })
 
-/*app.controller("questionList",function($scope,$state,$stateParams){
-    var x = $stateParams.param1;
-    $scope.questionList = [{questionName:"ABC",id:""}];
-    $scope.questionList.push({questionName:x.questionName});
-    $scope.editQuestion = function(){
-        $state.go('state1',{questionId:x})
-    }
-})*/
+
