@@ -56,6 +56,7 @@
                         <span class="questionLabel">CHOICE TYPE:</span><br>
                         <select ng-options="i for i in choiceType"
                                 class="dropdownStyle"
+                                ng-click="choiceTypeSelected()"
                                 ng-model="questionMetaData.choiceTypeSelected">
 
                         </select>
@@ -290,10 +291,16 @@
                         </td>
                         <td>
                             <input ng-show="questionMetaData.choiceTypeSelected == 'Multi Select'"
-                                   name="ch"
+                                   name="choicemultiselect"
                                    type="radio"
                                    ng-checked="r.answer"
-                                   ng-model="r.answer">
+                                   >
+                            <!--<input ng-show="questionMetaData.choiceTypeSelected == 'Multi Select'"
+                                   name="ch"
+                                   type="radio"
+                                   ng-value="r.choice"
+                                   ng-checked="r.answer"
+                                   ng-model="r.choice">-->
                             <input ng-hide="questionMetaData.choiceTypeSelected == 'Multi Select'"
                                    type="checkbox"
                                    ng-model='r.answer'/>
@@ -310,114 +317,7 @@
     </div>
 
     <!-- Modal -->
-    <!--<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content" style="margin:0 auto;width:700px!important;min-height:400px !important">
-                <div class="modal-header">
-
-                </div>
-                <div class="modal-body"
-                     style="padding:0px"
-                >
-                    <div style="background-image:url('images/cloud-bg.png');
-                         background-size:100% 100%;
-                         background-repeat:no-repeat">
-                        <div
-                                id="questionName"
-                                style="height:100px;
-                                width:70%;
-                                background-image:url('images/cloud-header.png');
-                                background-size:100% 100%;
-                                height:82px;
-                                margin:0 auto;
-                                text-align:center;
-                                background-repeat:no-repeat"
-                        >
-
-                        </div>
-                        <div style='width:70%;height:250px;margin:0 auto;'>
-                            <table ng-style='getDataTableStyle()'>
-                                <tr ng-repeat="x in ritems">
-                                    <td style="padding-left:10px;font-size:30px;color:purple;text-align:center" ng-repeat="y in x.cols">
-                                        <span ng-if='y.checked == false'>{{y.value}}</span>
-                                        <input span
-                                               ng-if="y.checked == true && questionMetaData.choiceTypeSelected!='Drag And Drop'"
-                                               type='text'
-                                               ng-model="y.answer"
-                                               id="y.value"
-                                               class="emptyBox"
-                                               ng-keypress="previewKeyPress($event,y)"
-                                               ng-disabled="questionMetaData.choiceTypeSelected == 'Multi Select'"/>
-                                        <div class="emptyBox"
-                                             ng-attr-id="{{'data'+y.value}}"
-                                             ng-if="y.checked == true && questionMetaData.choiceTypeSelected=='Drag And Drop'">
-                                            <p></p>
-                                        </div>
-
-                                    <td>
-                                    <td>
-                                        <span style="font-size:11px;font-weight:bold">{{x.hint}}</span>
-                                    </td>
-                                </tr>
-                            </table>
-
-
-                            <table ng-if="dataObj.sidebysideSolutionContent.solutionType == 'Side By Side'"
-                                   ng-show="showSidebysideSolutionContent" style="width:30%;float:right">
-                                <tr ng-repeat="x in dataObj.sidebysideSolutionContent.solutionRows">
-                                    <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
-                                        <span ng-if="y.type=='text'||y.type=='S'">{{y.value}}</span>
-                                        <span ng-if="y.type=='img'"><img width="30px" height="30px"
-                                                                         ng-src="{{y.value}}"/></span>
-
-                                    <td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div id="modelSolutionContent"
-                             style="height:100px;width:100%;background:lightblue"
-                             ng-show="showModelSolutionContent">
-                        </div>
-
-                    </div>
-                    <div >
-                        <div ng-show="choiceVisibility()"
-                             id="choicesContainer" style="margin-top:10px;margin-bottom:10px">
-                            <table width="100%">
-                                <tr>
-                                    <td class="choiceTd" ng-repeat='r in choices'>
-
-                                        <div  ng-class="getStyleObj()">
-                                            <div class="dummy"style="width:100%;height:100%" ng-attr-id="{{'choice'+r.choice}}">
-                                                <p
-                                                        style="padding-top:4px"
-                                                        ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'">
-                                                    {{r.choice}}</p>
-                                                <div
-
-                                                        style="
-                                                                width:100%;height:100%;color:black;
-                                                                background-image:url('images/choices.png');
-                                                                background-size:100% 100%"
-                                                        ng-attr-id="{{'choiceDiv'+r.choice}}"
-                                                        ng-if="questionMetaData.choiceTypeSelected == 'Multi Select'"
-                                                        ng-click='choiceSelected(r)'> {{r.choice}}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-
-
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>-->
-    <div id="exampleModal" class="modal fade" role="dialog">
+    <div class="modal fade" id="exampleModal"  role="dialog">
         <div class="modal-dialog">
 
             <!-- Modal content-->
@@ -478,7 +378,7 @@
 
                     </div>
                     <div >
-                        <div ng-show="choiceVisibility()"
+                        <!--<div ng-show="choiceVisibility()"
                              id="choicesContainer">
                             <table width="100%">
                                 <tr>
@@ -501,8 +401,30 @@
                                     </td>
                                 </tr>
                             </table>
+                        </div>-->
+                        <div ng-show="choiceVisibility()" id="choicesContainer">
+                            <table style='width:100%'>
+                                <tr>
+                                    <td class="choiceTd" ng-repeat='r in choices'>
+                                        <div ng-class="getStyleObj()">
+                                            <div ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'"
+                                                 class='dummy' ng-attr-id="{{'choice'+r.choice}}">
+                                                <p >
+                                                    {{r.choice}}</p>
+                                            </div>
+                                            <div class="multiselectClass"
+                                                 ng-if="questionMetaData.choiceTypeSelected == 'Multi Select'">
+                                                <div
+                                                        class="multiSelectChoiceDiv"
+                                                        ng-attr-id="{{'choiceDiv'+r.choice}}"
+                                                        ng-click='choiceSelected(r)'>
+                                                    <div class="multiSelectChoiceText">{{r.choice}}</div></div>
+                                            </div>
 
-
+                                            </div>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -530,9 +452,9 @@
 
         </div>
     </div>
-    <div class="modal fade" id="symbolModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" style="width:200px" role="document">
-            <div class="modal-content">
+    <div class="modal fade" id="symbolModal" role="dialog" >
+        <div class="modal-dialog" style="width:200px;height:100px">
+            <div class="modal-content" style="width:100%;height:100%">
                 <div class="modal-header">
                     <h5 class="modal-title" style="text-align:center;width:100%">Select Symbol</h5>
                 </div>
@@ -548,9 +470,9 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="iconModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
+    <div class="modal fade" id="iconModal"  role="dialog" >
+        <div class="modal-dialog" style="height:250px">
+            <div class="modal-content" style="height:100%">
                 <div class="modal-header">
                     <h5 class="modal-title" style="text-align:center;width:100%">Select Icon</h5>
                 </div>
