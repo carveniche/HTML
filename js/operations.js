@@ -1,7 +1,7 @@
 var app = angular.module("questionBuilder",[]);
 
 
-app.controller("myCtrl", function ($scope) {
+app.controller("myCtrl", function ($scope,$window) {
     $scope.ritems = [];
     $scope.citems = [];
     $scope.images = ['images/circle-blue.png',
@@ -742,7 +742,10 @@ app.controller("myCtrl", function ($scope) {
                choiceType: "Fill",
                choices: []/*["8", "9", "10", "11"]*/,
                modelSolutionContent: {solutionType: "Model",
-                   solutionContent:[ {value: "12234444444444444", line: 0, type: "M"}]},
+                   solutionContent:[ {value: "12234444444444444", line: 0, type: "M"},
+                       {value: "1223444444", line: 1, type: "M"},
+                       {value: "1223", line: 2, type: "M"},
+                       {value: "12234444", line: 3, type: "M"}]},
                operation: "Multiplication",
                questionContent:  [{row: 1, col: 1, value: "1", isMissed: false},
                {row: 1, col: 2, value: "2", isMissed: false},
@@ -753,7 +756,16 @@ app.controller("myCtrl", function ($scope) {
            {row: 2, col: 3, value: "7", isMissed: false},
             {row: 2, col: 4, value: "8", isMissed: true}],
            questionName: "This a question Title",
-           sidebysideSolutionContent: {}};
+           sidebysideSolutionContent: {solutionCols:[ {col1: "0-0", value: ""},
+                   {col1: "1-1", value: ""},
+           {col1: "2-1", value: ""}],
+           solutionContent: [],
+           solutionRows: [{cols:[{col1: "0-0", value: "1", checked: false, type: "text"},
+          {col1: "2-0", value: "2", type: "text"},
+           {col1: "3-0", value: "3", type: "text"},
+          ],
+           row1: 0}],
+           solutionType: "Side By Side"}};
            var solutionPresent = (!(isEmpty(obj.modelSolutionContent))) || (!(isEmpty(obj.sidebysideSolutionContent)))?true:false;
            if(solutionPresent){
                $scope.solutionArray = [];
@@ -809,6 +821,28 @@ app.controller("myCtrl", function ($scope) {
            };
 
        }
+    };
+    $window.onload = function() {
+        var modelSolution = $scope.solutionArray.find(function(ob){
+            return ob.solutionType == 'Model';
+        });
+
+        var sidebyside = $scope.solutionArray.find(function(ob){
+            return ob.solutionType == 'Side By Side';
+        });
+        if(sidebyside){
+            sidebyside.solutionRows.forEach(function(row){
+                row.cols.forEach(function(col,idx){
+                    $("#box"+idx+col.col1).text(col.value);
+                })
+            })
+        }
+
+        if(modelSolution){
+            modelSolution.solutionContent.forEach(function(sol){
+                $("#line"+sol.line).text(sol.value);
+            })
+        }
     };
     $scope.init()
 
