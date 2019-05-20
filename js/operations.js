@@ -295,16 +295,54 @@ app.controller("myCtrl", function ($scope,$window) {
             return;
         }
         ;
-        var choiceRepeated = false;
-        $scope.choices.forEach(function (element) {
-            var x = missedElements.includes(element.choice);
-            /* if(x){
-                 alert('Please do not add missed value as choice');
-                 choiceRepeated =true;
-                 return;
-             };*/
+        if($scope.dataObj.modelSolutionContent &&
+            $scope.dataObj.modelSolutionContent.solutionContent &&
+            $scope.dataObj.modelSolutionContent.solutionContent.length==0){
+            alert('Please add solution line for model solution');
+        };
+        if($scope.dataObj.modelSolutionContent &&
+            $scope.dataObj.modelSolutionContent.solutionContent &&
+            $scope.dataObj.modelSolutionContent.solutionContent.length>0){
+            var blankAns = [];
+            $scope.dataObj.modelSolutionContent.solutionContent.forEach(function(ob){
+                if(ob.value == ""){
+                    blankAns.push(true) ;
+                }
+            });
+            if(blankAns.length>0){
+                alert("Solution Line in Model solution cannot be empty");
+                return;
+            }
+        };
+        if($scope.dataObj.sidebysideSolutionContent &&
+            $scope.dataObj.sidebysideSolutionContent.solutionRows &&
+            $scope.dataObj.sidebysideSolutionContent.solutionRows.length==0){
+            alert("Please add row for solution content");
+            return;
+        }
 
-        });
+        if($scope.dataObj.sidebysideSolutionContent &&
+            $scope.dataObj.sidebysideSolutionContent.solutionRows &&
+            $scope.dataObj.sidebysideSolutionContent.solutionRows.length>0){
+            var blankAns = [];
+            $scope.dataObj.sidebysideSolutionContent.solutionRows.forEach(function(ob){
+                ob.cols.forEach(function(col){
+                    if(col.value==""){
+                        blankAns.push(true)
+                    }
+                })
+            });
+            if(blankAns.length>0){
+                alert("Solution Box cannot be empty");
+                return;
+            }
+
+        };
+        var choiceRepeated = false;
+        if(choiceSelected == 'Multi Select' && $scope.choices.length!= 4){
+            alert('Please choose 4 choices for the question');
+            return
+        };
         if (!choiceRepeated) {
             var status = $scope.populateChoiceArray();
             if (status) {
@@ -318,13 +356,29 @@ app.controller("myCtrl", function ($scope,$window) {
         ;
 
     };
+    $scope.limitQuestionKeyPress = function($event){
+        re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+        var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
+
+        var isSplChar = re.test(str);
+        if(isSplChar){
+            $event.preventDefault();
+            return false;
+        }
+
+    }
     $scope.limitKeypress = function ($event, obj, row, sol, id) {
         var regex = new RegExp("^[a-zA-a]+$");
         var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
 
         if (regex.test(str)) {
-            $event.preventDefault();
-            return false;
+            if(sol&&sol.solutionType == 'Model'){
+
+            }else{
+                $event.preventDefault();
+                return false;
+            }
+
         } else if ($scope.questionMetaData.multiplicationType == 'Vertical' && !sol) {
 
             if (obj.value != undefined && obj.value.length > 0) {
@@ -570,7 +624,8 @@ app.controller("myCtrl", function ($scope,$window) {
                             $(this).empty();
                             ui.draggable.clone().appendTo($(this));
                             var val = $(ui.draggable).attr("id");
-                            col.answer = document.getElementById(val).innerHTML;
+                            col.answer = document.getElementById(val+'elem').innerHTML;
+                            col.answer = col.answer.trim();
 
                         }
                     })
@@ -842,6 +897,25 @@ app.controller("myCtrl", function ($scope,$window) {
             modelSolution.solutionContent.forEach(function(sol){
                 $("#line"+sol.line).text(sol.value);
             })
+        }
+    };
+    $scope.getColumnBorder = function(idx){
+        if($scope.questionMetaData.multiplicationType == 'Vertical' && $scope.ritems.length>1){
+            if((idx+1) == $scope.ritems.length){
+                return {"border-top":"1px solid grey","border-bottom":"1px solid grey"}
+            }
+        }
+
+    };
+    $scope.removeSolution = function(sol){
+        var idx = $scope.solutionArray.findIndex(function(ob){
+            return(ob.solutionType == sol.solutionType)
+        });
+
+        $scope.solutionArray.splice(idx,1);
+        if($scope.solutionArray.length==0){
+            $scope.solutionVisibility = false;
+            $scope.solutionArray = [{solutionType: 'Select', solutionContent: [], solutionRows: [], solutionCols: []}];
         }
     };
     $scope.init()
