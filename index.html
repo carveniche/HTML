@@ -87,6 +87,7 @@
                         <div id="questionTitle"
                              contentEditable=true
                              ng-bind="title"
+                             ng-keypress="limitQuestionKeyPress($event)"
                              style="margin-left:10px;height:50px;"
                              class="divTextBox">
                         </div>
@@ -105,7 +106,8 @@
 
                 </tr>
             </table>
-            <div style="width:100%;margin:0 auto;padding-top:50px;height:auto;">
+            <div class="row">
+            <div class="col-sm-12"style="margin:0 auto;padding-top:50px;height:auto;">
                 <table width="100%">
                     <tr>
                         <td>
@@ -114,12 +116,12 @@
                             <button ng-click="removeCol($index)" class='removeBtn'>X</button>
                         </td>
                     </tr>
-                    <tr ng-repeat="x in ritems">
-                        <td style="vertical-align: text-top">
+                    <tr ng-repeat="x in ritems" ng-style="getColumnBorder($index)">
+                        <td style="vertical-align: text-top" >
                             <!--<br>-->
                             <button ng-click="removeRow(x,ritems)" class='removeBtn'>X</button>
                         </td>
-                        <td ng-repeat="y in x.cols">
+                        <td ng-repeat="y in x.cols" style="padding-top:5px !important">
                             <!-- <button class='removeBtn' >X</button><br>-->
                             <input type="text"
                                    ng-model='y.value'
@@ -139,7 +141,7 @@
                             <br>
                             <button class='removeBtn' ng-click="showSymbolModalPopup(y,'Q','',x)">S</button>
                         <td>
-                        <td>
+                        <td width="20%">
                             <input type="text"
                                    ng-model='x.hint'
                                    placeholder="Hint"
@@ -147,6 +149,7 @@
                         </td>
                     </tr>
                 </table>
+            </div>
             </div>
 
         </div>
@@ -164,6 +167,10 @@
                     <div ng-repeat="sol in solutionArray">
                         <table style="width:60%">
                             <tr>
+                                <td width="5%" style="padding-top:15px;padding-left:10px">
+                                    <button class='removeBtn' ng-click="removeSolution(sol)">X
+                                    </button>
+                                </td>
                                 <td width="25%">
                                     <span class="questionLabel">SOLUTION TYPE:</span>
                                     <select ng-options="s for s in solutionType"
@@ -378,30 +385,7 @@
 
                     </div>
                     <div >
-                        <!--<div ng-show="choiceVisibility()"
-                             id="choicesContainer">
-                            <table width="100%">
-                                <tr>
-                                    <td class="choiceTd" ng-repeat='r in choices'>
 
-                                        <div  ng-class="getStyleObj()">
-                                            <div class="dummy"style="width:100%;height:100%" ng-attr-id="{{'choice'+r.choice}}">
-                                                <p
-                                                        style="padding-top:4px"
-                                                        ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'">
-                                                    {{r.choice}}</p>
-                                                <div
-                                                        class="multiSelectChoiceDiv"
-                                                        ng-attr-id="{{'choiceDiv'+r.choice}}"
-                                                        ng-if="questionMetaData.choiceTypeSelected == 'Multi Select'"
-                                                        ng-click='choiceSelected(r)'>
-                                                    <div class="multiSelectChoiceText">{{r.choice}}</div></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>-->
                         <div ng-show="choiceVisibility()" id="choicesContainer">
                             <table style='width:100%'>
                                 <tr>
@@ -409,7 +393,7 @@
                                         <div ng-class="getStyleObj()">
                                             <div ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'"
                                                  class='dummy' ng-attr-id="{{'choice'+r.choice}}">
-                                                <p >
+                                                <p ng-attr-id="{{'choice'+r.choice+'elem'}}"style="background:#FC7771">
                                                     {{r.choice}}</p>
                                             </div>
                                             <div class="multiselectClass"
@@ -418,7 +402,7 @@
                                                         class="multiSelectChoiceDiv"
                                                         ng-attr-id="{{'choiceDiv'+r.choice}}"
                                                         ng-click='choiceSelected(r)'>
-                                                    <div class="multiSelectChoiceText">{{r.choice}}</div></div>
+                                                    <div class="multiSelectChoiceText" ng-attr-id="{{'choice'+r.choice}}">{{r.choice}}</div></div>
                                             </div>
 
                                             </div>
