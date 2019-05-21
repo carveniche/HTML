@@ -86,8 +86,6 @@
                         </button>
                         <div id="questionTitle"
                              contentEditable=true
-                             ng-bind="title"
-                             ng-keypress="limitQuestionKeyPress($event)"
                              style="margin-left:10px;height:50px;"
                              class="divTextBox">
                         </div>
@@ -175,6 +173,7 @@
                                     <span class="questionLabel">SOLUTION TYPE:</span>
                                     <select ng-options="s for s in solutionType"
                                             class="dropdownStyle"
+                                            ng-click="selectSolutionType(sol,sol.solutionType)"
                                             ng-model="sol.solutionType"> </select>
                                 </td>
 
@@ -237,7 +236,7 @@
                                     <td>
                                     </td>
                                     <td ng-repeat='col in sol.solutionRows[0].cols'>
-                                        <button ng-click="removeSolutionCol($index,sol.solutionRows)"
+                                        <button ng-click="removeSolutionCol($index,sol)"
                                                 class='removeBtn'>X
                                         </button>
                                     </td>
@@ -392,8 +391,8 @@
                                     <td class="choiceTd" ng-repeat='r in choices'>
                                         <div ng-class="getStyleObj()">
                                             <div ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'"
-                                                 class='dummy' ng-attr-id="{{'choice'+r.choice}}">
-                                                <p ng-attr-id="{{'choice'+r.choice+'elem'}}"style="background:#FC7771">
+                                                 class='dummy' ng-attr-id="{{'choice'+r.choice}}" style="width:36px;height:36px;background:#FC7771">
+                                                <p ng-attr-id="{{'choice'+r.choice+'elem'}}"style="">
                                                     {{r.choice}}</p>
                                             </div>
                                             <div class="multiselectClass"
