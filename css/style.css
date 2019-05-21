@@ -112,8 +112,8 @@ input[type=text], select {
 
 }
 .emptyBox {
-    height:40px;
-    width:40px;
+    height:36px;
+    width:36px;
     border:1px dotted purple;
     margin:0 auto
 }
@@ -125,7 +125,7 @@ input[type=text], select {
 }
 .dragBox{
     border:2px solid #333;
-    width:40px;height:35px;
+    width:45px;height:40px;
     color:black;
     margin:0 auto;
     border-radius:2px;
