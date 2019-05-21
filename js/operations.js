@@ -356,21 +356,33 @@ app.controller("myCtrl", function ($scope,$window) {
         ;
 
     };
-    $scope.limitQuestionKeyPress = function($event){
-        re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
-        var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
+    $scope.checkForSpecialCharacters = function(str,$event,value){
 
-        var isSplChar = re.test(str);
-        if(isSplChar){
+        var splRegex = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+        var isSplChar = splRegex.test(str);
+        var isSplCharInValue = splRegex.test(value);
+
+        if(isSplCharInValue){
             $event.preventDefault();
             return false;
-        }
+        };
+        if(isSplChar && value.length>0){
+            $event.preventDefault();
+            return false;
+        };
+
 
     }
     $scope.limitKeypress = function ($event, obj, row, sol, id) {
+        var splRegex = /[`~!@#$%^&*&times()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
         var regex = new RegExp("^[a-zA-a]+$");
         var str = String.fromCharCode(!$event.charCode ? $event.which : $event.charCode);
 
+        if(sol&&sol.solutionType == 'Model'){
+
+        }else{
+            $scope.checkForSpecialCharacters(str,$event,obj.value);
+        }
         if (regex.test(str)) {
             if(sol&&sol.solutionType == 'Model'){
 
@@ -483,6 +495,10 @@ app.controller("myCtrl", function ($scope,$window) {
         $('#iconModal').modal('show');
     };
     $scope.selectSymbol = function (val) {
+        var splRegex = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+        var isSplChar = splRegex.test(val);
+
+
         if ($scope.selectedColForSymbol.type == 'M') {
             $scope.solutionArray.forEach(function (elem) {
                 if (elem.solutionType == 'Model') {
@@ -502,10 +518,15 @@ app.controller("myCtrl", function ($scope,$window) {
                     elem.solutionRows.forEach(function (elemrow) {
                         if (elemrow.row1 == $scope.selectedColForSymbol.row) {
                             elemrow.cols.forEach(function (elemcol) {
+
                                 if (elemcol.col1 == $scope.selectedColForSymbol.col1) {
-                                    var str = $("#" + $scope.selectedColForSymbol.id).html() + val;
-                                    elemcol.value = str;
                                     var e = document.getElementById($scope.selectedColForSymbol.id);
+                                    if(isSplChar){
+                                        var str = val;
+                                    }else{
+                                        var str = $("#" + $scope.selectedColForSymbol.id).html() + val;
+                                    }
+                                    elemcol.value = str;
                                     e.innerHTML = str;
                                 }
                             })
@@ -610,6 +631,7 @@ app.controller("myCtrl", function ($scope,$window) {
             $(".dummy").draggable();
             $(".dummy").draggable({
                 revert: "invalid",
+                revert: "invalid",
                 helper: "clone",
             });
         });
@@ -660,7 +682,6 @@ app.controller("myCtrl", function ($scope,$window) {
     $scope.removeCol = function (idx) {
         $scope.ritems.forEach(function (row) {
             row.cols.splice(idx, 1);
-
         });
         $scope.citems.splice(idx, 1);
         if ($scope.ritems[0].cols.length == 0) {
@@ -746,10 +767,11 @@ app.controller("myCtrl", function ($scope,$window) {
         return false;
     };
     $scope.removeSolutionCol = function (idx, array) {
-        array.forEach(function (row) {
+        array.solutionRows.forEach(function (row) {
             row.cols.splice(idx, 1);
         });
-        if (array[0].cols.length == 0) {
+        array.solutionCols.splice(idx,1);
+        if (array.solutionRows[0].cols.length == 0) {
             $scope.solutionArray.forEach(function (sol) {
                 if (sol.solutionType == 'Side By Side') {
                     sol.solutionRows = [];
@@ -797,7 +819,7 @@ app.controller("myCtrl", function ($scope,$window) {
                choiceType: "Fill",
                choices: []/*["8", "9", "10", "11"]*/,
                modelSolutionContent: {solutionType: "Model",
-                   solutionContent:[ {value: "12234444444444444", line: 0, type: "M"},
+                   solutionContent:[ {value: "<img src='images/circle-blue.png' width='25px' height='25px'>", line: 0, type: "M"},
                        {value: "1223444444", line: 1, type: "M"},
                        {value: "1223", line: 2, type: "M"},
                        {value: "12234444", line: 3, type: "M"}]},
@@ -810,12 +832,12 @@ app.controller("myCtrl", function ($scope,$window) {
            {row: 2, col: 2, value: "6", isMissed: false},
            {row: 2, col: 3, value: "7", isMissed: false},
             {row: 2, col: 4, value: "8", isMissed: true}],
-           questionName: "This a question Title",
+           questionName:"\"helllowwwww<img src=\"images/circle-blue.png\" width=\"25px\" height=\"25px\">dffddfdfdfdf<img src=\"images/heart-blue.png\" width=\"25px\" height=\"25px\">\"\n",
            sidebysideSolutionContent: {solutionCols:[ {col1: "0-0", value: ""},
                    {col1: "1-1", value: ""},
            {col1: "2-1", value: ""}],
            solutionContent: [],
-           solutionRows: [{cols:[{col1: "0-0", value: "1", checked: false, type: "text"},
+           solutionRows: [{cols:[{col1: "0-0", value: "<img src='images/circle-blue.png' width='25px' height='25px'>", checked: false, type: "text"},
           {col1: "2-0", value: "2", type: "text"},
            {col1: "3-0", value: "3", type: "text"},
           ],
@@ -874,7 +896,12 @@ app.controller("myCtrl", function ($scope,$window) {
                    $scope.choices.push({choice:val, answer: '', index:idxValue});
                })
            };
-
+           if($scope.title){
+               var titleBody = '<span>';
+               titleBody += $scope.title;
+               titleBody += '</span>';
+               $('#questionTitle').html(titleBody);
+           };
        }
     };
     $window.onload = function() {
@@ -888,14 +915,21 @@ app.controller("myCtrl", function ($scope,$window) {
         if(sidebyside){
             sidebyside.solutionRows.forEach(function(row){
                 row.cols.forEach(function(col,idx){
-                    $("#box"+idx+col.col1).text(col.value);
+                    var titleBody = '<span>';
+                    titleBody += col.value;
+                    titleBody += '</span>';
+                    $("#box"+idx+col.col1).html(titleBody);
                 })
             })
         }
 
         if(modelSolution){
             modelSolution.solutionContent.forEach(function(sol){
-                $("#line"+sol.line).text(sol.value);
+                var titleBody = '<span>';
+                titleBody += sol.value;
+                titleBody += '</span>';
+                $("#line"+sol.line).html(titleBody);
+                //$("#line"+sol.line).text(sol.value);
             })
         }
     };
@@ -916,6 +950,14 @@ app.controller("myCtrl", function ($scope,$window) {
         if($scope.solutionArray.length==0){
             $scope.solutionVisibility = false;
             $scope.solutionArray = [{solutionType: 'Select', solutionContent: [], solutionRows: [], solutionCols: []}];
+        }
+    };
+    $scope.selectSolutionType = function(sol,type){
+        if(type == 'Model'){
+            sol.solutionCols = [];
+            sol.solutionRows = [];
+        }else if(type == 'Side By Side'){
+            sol.solutionContent = [];
         }
     };
     $scope.init()
