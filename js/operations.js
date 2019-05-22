@@ -75,8 +75,6 @@ app.controller("myCtrl", function ($scope,$window) {
 
         }
         ;
-
-
         $scope.solutionArray.forEach(function (obj) {
             if (obj.solutionType == 'Model') {
                 $scope.dataObj.modelSolutionContent = obj;
@@ -86,7 +84,7 @@ app.controller("myCtrl", function ($scope,$window) {
             }
         });
         $scope.creatingModelSolution();
-
+        $scope.creatingSideBySideSolution();
     };
     $scope.populateChoiceArray = function () {
         var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
@@ -332,10 +330,11 @@ app.controller("myCtrl", function ($scope,$window) {
                     }
                 })
             });
-            if(blankAns.length>0){
+
+            if( $scope.dataObj.sidebysideSolutionContent.solutionRows[0].cols.length == blankAns.length){
                 alert("Solution Box cannot be empty");
                 return;
-            }
+            };
 
         };
         var choiceRepeated = false;
@@ -556,7 +555,7 @@ app.controller("myCtrl", function ($scope,$window) {
                         if (elemrow.row1 == $scope.selectedElementForIcon.row) {
                             elemrow.cols.forEach(function (elemcol) {
                                 if (elemcol.col1 == $scope.selectedElementForIcon.col1) {
-                                    elemcol.value = url;
+                                    elemcol.value ="<img src="+url+" width='25px' height='25px'>";
                                     elemcol.type = 'img';
                                 }
                             })
@@ -608,6 +607,25 @@ app.controller("myCtrl", function ($scope,$window) {
         });
         $scope.choices.splice(found, 1);
     };
+    $scope.creatingSideBySideSolution = function(){
+        if ($scope.dataObj.sidebysideSolutionContent){
+            if($scope.dataObj.sidebysideSolutionContent.solutionRows){
+                var data = $scope.dataObj.sidebysideSolutionContent.solutionRows;
+                var table_body = '<table>';
+                for(var i =0;i<data.length;i++){
+                    table_body +='<tr>';
+                    for(var x =0;x<data[i].cols.length;x++){
+                        table_body +='<td>';
+                        table_body += data[i].cols[x].value;
+                        table_body +='</td>';
+                    }
+                    table_body +='</tr>';
+                }
+                table_body +='</table>';
+                $('#sidebysideSolutionContent').html(table_body);
+            }
+        }
+    }
     $scope.creatingModelSolution = function () {
         if ($scope.dataObj.modelSolutionContent) {
             if ($scope.dataObj.modelSolutionContent.solutionContent) {
@@ -798,12 +816,21 @@ app.controller("myCtrl", function ($scope,$window) {
             $scope.ritems.forEach(function(ob){
                 ob.cols.forEach(function(col){
                     if(col.checked){
-                        var idxValue = $scope.choices.length == 0?1:999;
-                        $scope.choices.push({choice:col.value, answer:true, index:idxValue});
+                        var idx = $scope.choices.findIndex(function(element){
+                           return(col.value == element.choice)
+                        });
+                        if(idx == -1){
+                            var idxValue = $scope.choices.length == 0?1:999;
+                            $scope.choices.push({choice:col.value, answer:true, index:idxValue});
+                        }
+
                     }
                 })
 
             })
+            if($scope.choices.length==0){
+                $scope.choices = [{choice: '', answer: '', index: 1}];
+            }
         }
     };
     $scope.init = function(){
@@ -837,7 +864,7 @@ app.controller("myCtrl", function ($scope,$window) {
                    {col1: "1-1", value: ""},
            {col1: "2-1", value: ""}],
            solutionContent: [],
-           solutionRows: [{cols:[{col1: "0-0", value: "<img src='images/circle-blue.png' width='25px' height='25px'>", checked: false, type: "text"},
+           solutionRows: [{cols:[{col1: "0-0", value: "<img src='images/circle-blue.png' width='25px' height='25px'>", checked: false, type: "img"},
           {col1: "2-0", value: "2", type: "text"},
            {col1: "3-0", value: "3", type: "text"},
           ],
