@@ -363,19 +363,12 @@
                                     </td>
                                 </tr>
                             </table>
+                            <div id="sidebysideSolutionContent"
+                                 ng-show="showSidebysideSolutionContent"
+                                 style="width:30%;float:right">
+                            </div>
 
 
-                            <table ng-if="dataObj.sidebysideSolutionContent.solutionType == 'Side By Side'"
-                                   ng-show="showSidebysideSolutionContent" style="width:30%;float:right">
-                                <tr ng-repeat="x in dataObj.sidebysideSolutionContent.solutionRows">
-                                    <td style="padding-left:10px;font-size:30px;color:purple" ng-repeat="y in x.cols">
-                                        <span ng-if="y.type=='text'||y.type=='S'">{{y.value}}</span>
-                                        <span ng-if="y.type=='img'"><img width="30px" height="30px"
-                                                                         ng-src="{{y.value}}"/></span>
-
-                                    <td>
-                                </tr>
-                            </table>
                         </div>
                         <div id="modelSolutionContent"
                              style="height:100px;width:100%;background:lightblue"
