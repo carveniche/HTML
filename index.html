@@ -343,11 +343,21 @@
                                 <tr ng-repeat="x in ritems">
                                     <td style="padding-left:10px;font-size:30px;color:purple;text-align:center" ng-repeat="y in x.cols">
                                         <span ng-if='y.checked == false'>{{y.value}}</span>
+
                                         <input span
-                                               ng-if="y.checked == true && questionMetaData.choiceTypeSelected!='Drag And Drop'"
+                                               ng-if="y.checked == true && questionMetaData.choiceTypeSelected=='Fill'"
                                                type='text'
                                                ng-model="y.answer"
-                                               id="y.value"
+                                               ng-attr-id="{{y.value}}"
+                                               class="emptyBox"
+                                               ng-keypress="previewKeyPress($event,y)"
+                                               />
+                                        <input span
+                                               ng-if="y.checked == true && questionMetaData.choiceTypeSelected=='Multi Select'"
+                                               type='text'
+                                               ng-model="y.answer"
+                                               style="background:transparent"
+                                               ng-attr-id="{{y.value}}"
                                                class="emptyBox"
                                                ng-keypress="previewKeyPress($event,y)"
                                                ng-disabled="questionMetaData.choiceTypeSelected == 'Multi Select'"/>
