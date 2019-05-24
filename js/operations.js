@@ -97,12 +97,20 @@ app.controller("myCtrl", function ($scope,$window) {
                 }
             }
             ;
-            var duplicates = []
+            var duplicates = [];
+            var emptyChoices = [];
             $scope.choices.forEach(function (val) {
+                if(val.choice == ""){
+                    emptyChoices.push(true);
+                };
                 if (!duplicates.includes(val.choice)) {
                     duplicates.push(val.choice);
                 }
             });
+            if(emptyChoices.length >0){
+                alert("Choice values cannot be empty");
+                return;
+            }
             if (duplicates.length != $scope.choices.length) {
                 alert('Please remove duplicate choices');
                 return false;
@@ -251,8 +259,13 @@ app.controller("myCtrl", function ($scope,$window) {
         var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
         $scope.createFinalDataObj();
         var missedElements = [];
+        var dataBoxes = [];
         //Validating the data
         $scope.dataObj.questionContent.forEach(function (element) {
+            if(element.value != ''){
+                dataBoxes.push(true);
+            };
+
             if (element.isMissed == true) {
                 missedElements.push(element.value);
             }
@@ -283,6 +296,10 @@ app.controller("myCtrl", function ($scope,$window) {
             return;
         }
         ;
+        if(dataBoxes.length == 0){
+            alert("Please enter values in question content boxes");
+            return;
+        }
         if($scope.solutionArray[0].solutionType=='Select'){
             alert('Please provide atleast one solution for question');
             return;
@@ -342,6 +359,7 @@ app.controller("myCtrl", function ($scope,$window) {
             alert('Please choose 4 choices for the question');
             return
         };
+
         if (!choiceRepeated) {
             var status = $scope.populateChoiceArray();
             if (status) {
