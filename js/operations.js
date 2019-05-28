@@ -254,7 +254,7 @@ app.controller("myCtrl", function ($scope,$window) {
     $scope.validationCheck = function () {
 
         $scope.dataObj = {};
-        $scope.questionMetaData.title = $("#questionTitle").html();
+        $scope.questionMetaData.title = $("#questionTitle").html().trim();
 
         var choiceSelected = $scope.questionMetaData.choiceTypeSelected;
         $scope.createFinalDataObj();
@@ -299,71 +299,73 @@ app.controller("myCtrl", function ($scope,$window) {
         if(dataBoxes.length == 0){
             alert("Please enter values in question content boxes");
             return;
-        }
-        if($scope.solutionArray[0].solutionType=='Select'){
-            alert('Please provide atleast one solution for question');
-            return;
         };
-
         if (missedElements.length == 0) {
             alert('Please select atleast one value as missed');
             return;
         }
         ;
-        if($scope.dataObj.modelSolutionContent &&
-            $scope.dataObj.modelSolutionContent.solutionContent &&
-            $scope.dataObj.modelSolutionContent.solutionContent.length==0){
-            alert('Please add solution line for model solution');
-            return;
-        };
-        if($scope.dataObj.modelSolutionContent &&
-            $scope.dataObj.modelSolutionContent.solutionContent &&
-            $scope.dataObj.modelSolutionContent.solutionContent.length>0){
-            var blankAns = [];
-            $scope.dataObj.modelSolutionContent.solutionContent.forEach(function(ob){
-                if(ob.value == ""){
-                    blankAns.push(true) ;
-                }
-            });
-            if(blankAns.length>0){
-                alert("Solution Line in Model solution cannot be empty");
-                return;
-            }
-        };
-        if($scope.dataObj.sidebysideSolutionContent &&
-            $scope.dataObj.sidebysideSolutionContent.solutionRows &&
-            $scope.dataObj.sidebysideSolutionContent.solutionRows.length==0){
-            alert("Please add row for solution content");
-            return;
-        }
 
-        if($scope.dataObj.sidebysideSolutionContent &&
-            $scope.dataObj.sidebysideSolutionContent.solutionRows &&
-            $scope.dataObj.sidebysideSolutionContent.solutionRows.length>0){
-            var blankAns = [];
-            $scope.dataObj.sidebysideSolutionContent.solutionRows.forEach(function(ob){
-                ob.cols.forEach(function(col){
-                    if(col.value==""){
-                        blankAns.push(true)
-                    }
-                })
-            });
 
-            if( $scope.dataObj.sidebysideSolutionContent.solutionRows[0].cols.length == blankAns.length){
-                alert("Solution Box cannot be empty");
-                return;
-            };
-
-        };
         var choiceRepeated = false;
         if(choiceSelected == 'Multi Select' && $scope.choices.length!= 4){
             alert('Please choose 4 choices for the question');
             return
         };
-
         if (!choiceRepeated) {
             var status = $scope.populateChoiceArray();
+
             if (status) {
+                if($scope.solutionArray[0].solutionType=='Select'){
+                    alert('Please provide atleast one solution for question');
+                    return;
+                };
+                if($scope.dataObj.modelSolutionContent &&
+                    $scope.dataObj.modelSolutionContent.solutionContent &&
+                    $scope.dataObj.modelSolutionContent.solutionContent.length==0){
+                    alert('Please add solution line for model solution');
+                    return;
+                };
+                if($scope.dataObj.modelSolutionContent &&
+                    $scope.dataObj.modelSolutionContent.solutionContent &&
+                    $scope.dataObj.modelSolutionContent.solutionContent.length>0){
+                    var blankAns = [];
+                    $scope.dataObj.modelSolutionContent.solutionContent.forEach(function(ob){
+                        if(ob.value == ""){
+                            blankAns.push(true) ;
+                        }
+                    });
+                    if(blankAns.length>0){
+                        alert("Solution Line in Model solution cannot be empty");
+                        return;
+                    }
+                };
+                if($scope.dataObj.sidebysideSolutionContent &&
+                    $scope.dataObj.sidebysideSolutionContent.solutionRows &&
+                    $scope.dataObj.sidebysideSolutionContent.solutionRows.length==0){
+                    alert("Please add row for solution content");
+                    return;
+                }
+
+                if($scope.dataObj.sidebysideSolutionContent &&
+                    $scope.dataObj.sidebysideSolutionContent.solutionRows &&
+                    $scope.dataObj.sidebysideSolutionContent.solutionRows.length>0){
+                    var blankAns = [];
+                    $scope.dataObj.sidebysideSolutionContent.solutionRows.forEach(function(ob){
+                        ob.cols.forEach(function(col){
+                            if(col.value==""){
+                                blankAns.push(true)
+                            }
+                        })
+                    });
+
+                    if( $scope.dataObj.sidebysideSolutionContent.solutionRows[0].cols.length == blankAns.length){
+                        alert("Solution Box cannot be empty");
+                        return;
+                    };
+
+                };
+
                 $scope.appendQuesTitle();
                 if (choiceSelected == 'Drag And Drop')
                     $scope.addDragableEements();
@@ -371,6 +373,8 @@ app.controller("myCtrl", function ($scope,$window) {
 
             }
         }
+
+
         ;
 
     };
@@ -634,7 +638,7 @@ app.controller("myCtrl", function ($scope,$window) {
                 for(var i =0;i<data.length;i++){
                     table_body +='<tr>';
                     for(var x =0;x<data[i].cols.length;x++){
-                        table_body +='<td>';
+                        table_body +='<td class="solutionTd">';
                         table_body += data[i].cols[x].value;
                         table_body +='</td>';
                     }
@@ -1006,6 +1010,33 @@ app.controller("myCtrl", function ($scope,$window) {
             sol.solutionContent = [];
         }
     };
+    $scope.testFunc = function(event,cols,row,id){
+        var KeyID = event.keyCode;
+        switch(KeyID)
+        {
+            case 8:
+            case 46:
+                var obj = $scope.solutionArray.find(function(sol){
+                    return (sol.solutionType == "Side By Side")
+                });
+                obj.solutionRows.forEach(function (elemrow) {
+                    if (elemrow.row1 == row.row1) {
+                        elemrow.cols.forEach(function (elemcol) {
+                            if (elemcol.col1 == cols.col1) {
+                                elemcol.value = document.getElementById(id).innerHTML;
+                                elemcol.value = elemcol.value.trim().substring(0,elemcol.value.trim().length-1);
+                                elemcol.type = 'text';
+                            }
+                        })
+                    }
+
+                })
+
+                break;
+            default:
+                break;
+        }
+    }
     $scope.init()
 
 })
