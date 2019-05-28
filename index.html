@@ -253,6 +253,7 @@
                                                 ng-attr-id="{{'box'+$index+y.col1}}"
                                                 contenteditable="true"
                                                 ng-keypress="limitKeypress($event,y,x,sol)"
+                                                ng-keydown ="testFunc($event,y,x,'box'+$index+y.col1)"
                                                 style="text-align:center;width:50px;height:40px;border:1px solid lightgrey">
 
                                         </div>
@@ -340,8 +341,8 @@
                         </div>
                         <div style='width:70%;height:250px;margin:0 auto;'>
                             <table ng-style='getDataTableStyle()'>
-                                <tr ng-repeat="x in ritems">
-                                    <td style="padding-left:10px;font-size:30px;color:purple;text-align:center" ng-repeat="y in x.cols">
+                                <tr ng-repeat="x in ritems" ng-style="getColumnBorder($index)">
+                                    <td class="solutionTd" ng-repeat="y in x.cols">
                                         <span ng-if='y.checked == false'>{{y.value}}</span>
 
                                         <input span
