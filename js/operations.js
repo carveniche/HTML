@@ -314,6 +314,7 @@ app.controller("myCtrl", function ($scope,$window) {
             $scope.dataObj.modelSolutionContent.solutionContent &&
             $scope.dataObj.modelSolutionContent.solutionContent.length==0){
             alert('Please add solution line for model solution');
+            return;
         };
         if($scope.dataObj.modelSolutionContent &&
             $scope.dataObj.modelSolutionContent.solutionContent &&
