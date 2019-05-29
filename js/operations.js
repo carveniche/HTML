@@ -231,10 +231,27 @@ app.controller("myCtrl", function ($scope,$window) {
         var found = dataArray.findIndex(function (element) {
             return element.row1 == obj.row1;
         });
+        dataArray[found].cols.forEach(function(col){
+            if(col.checked){
+                var choiceValIndx = $scope.choices.findIndex(function(ch){
+                    return(ch.choice == col.value);
+                });
+                if(choiceValIndx != -1)
+                    $scope.choices.splice(choiceValIndx,1);
+
+            }
+        })
         if (dataArray.length == 1) {
             $scope.citems = [];
         }
         ;
+        var addChoiceIdx = $scope.choices.findIndex(function(ch){
+            return(ch.index == 1);
+        });
+
+        if($scope.choices.length==0 || addChoiceIdx==-1){
+            $scope.choices.unshift({choice: '', answer: '', index: 1});
+        };
         dataArray.splice(found, 1);
     };
     $scope.choiceVisibility = function () {
@@ -260,11 +277,16 @@ app.controller("myCtrl", function ($scope,$window) {
         $scope.createFinalDataObj();
         var missedElements = [];
         var dataBoxes = [];
+        var emptyBoxes = [];
         //Validating the data
         $scope.dataObj.questionContent.forEach(function (element) {
             if(element.value != ''){
                 dataBoxes.push(true);
             };
+
+            if(element.value == ""){
+                emptyBoxes.push(true);
+            }
 
             if (element.isMissed == true) {
                 missedElements.push(element.value);
@@ -298,6 +320,10 @@ app.controller("myCtrl", function ($scope,$window) {
         ;
         if(dataBoxes.length == 0){
             alert("Please enter values in question content boxes");
+            return;
+        };
+        if(emptyBoxes.length>0 && $scope.questionMetaData.multiplicationType == 'Horizontal'){
+            alert("Please enter values in all the question content boxes");
             return;
         };
         if (missedElements.length == 0) {
@@ -350,17 +376,17 @@ app.controller("myCtrl", function ($scope,$window) {
                 if($scope.dataObj.sidebysideSolutionContent &&
                     $scope.dataObj.sidebysideSolutionContent.solutionRows &&
                     $scope.dataObj.sidebysideSolutionContent.solutionRows.length>0){
-                    var blankAns = [];
+                    var boxAns = [];
                     $scope.dataObj.sidebysideSolutionContent.solutionRows.forEach(function(ob){
                         ob.cols.forEach(function(col){
-                            if(col.value==""){
-                                blankAns.push(true)
+                            if(col.value!=""){
+                                boxAns.push(true)
                             }
                         })
                     });
 
-                    if( $scope.dataObj.sidebysideSolutionContent.solutionRows[0].cols.length == blankAns.length){
-                        alert("Solution Box cannot be empty");
+                    if(boxAns.length == 0){
+                        alert("All the boxes in solution cannot be empty");
                         return;
                     };
 
@@ -636,7 +662,12 @@ app.controller("myCtrl", function ($scope,$window) {
                 var data = $scope.dataObj.sidebysideSolutionContent.solutionRows;
                 var table_body = '<table>';
                 for(var i =0;i<data.length;i++){
-                    table_body +='<tr>';
+                    if(i==data.length-1 && data.length>2){
+                        table_body +='<tr style="border-top:1px solid grey;border-bottom:1px solid grey">';
+                    }else{
+                        table_body +='<tr>';
+
+                    }
                     for(var x =0;x<data[i].cols.length;x++){
                         table_body +='<td class="solutionTd">';
                         table_body += data[i].cols[x].value;
@@ -722,8 +753,24 @@ app.controller("myCtrl", function ($scope,$window) {
     };
     $scope.removeCol = function (idx) {
         $scope.ritems.forEach(function (row) {
+            var colValue = row.cols[idx];
+            if(colValue.checked){
+                var choiceValIndx = $scope.choices.findIndex(function(ch){
+                    return(ch.choice == colValue.value);
+                });
+                if(choiceValIndx != -1)
+                $scope.choices.splice(choiceValIndx,1);
+
+            }
             row.cols.splice(idx, 1);
         });
+        var addChoiceIdx = $scope.choices.findIndex(function(ch){
+            return(ch.index == 1);
+        });
+
+        if($scope.choices.length==0 || addChoiceIdx==-1){
+            $scope.choices.unshift({choice: '', answer: '', index: 1});
+        };
         $scope.citems.splice(idx, 1);
         if ($scope.ritems[0].cols.length == 0) {
             $scope.ritems = [];
@@ -991,6 +1038,15 @@ app.controller("myCtrl", function ($scope,$window) {
         }
 
     };
+    $scope.getSolutionColumnBorder = function(idx,sol){
+        if(sol.solutionType == 'Side By Side' && sol.solutionRows.length>2){
+            if((idx+1) == sol.solutionRows.length  ){
+                return {"border-top":"1px solid grey","border-bottom":"1px solid grey"}
+            }
+        }
+
+    };
+
     $scope.removeSolution = function(sol){
         var idx = $scope.solutionArray.findIndex(function(ob){
             return(ob.solutionType == sol.solutionType)
@@ -1036,6 +1092,22 @@ app.controller("myCtrl", function ($scope,$window) {
             default:
                 break;
         }
+    };
+    $scope.disableSolutionButton = function(){
+        var valueBox = [];
+        if($scope.ritems.length>0){
+            $scope.ritems.forEach(function(elem){
+                elem.cols.forEach(function(col){
+                    if(col.value!="")
+                        valueBox.push(col.value);
+                })
+
+            })
+        };
+        if(valueBox.length >0 ){
+            return false;
+        }
+        return true;
     }
     $scope.init()
 
