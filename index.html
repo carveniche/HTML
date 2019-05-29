@@ -31,7 +31,7 @@
             </button>
             <!-- Button trigger modal -->
 
-            <button class="btn btn-secondary" ng-click='addSolution()'>
+            <button class="btn btn-secondary" ng-disabled="disableSolutionButton()" ng-click='addSolution()'>
                 Add solution
             </button>
         </div>
@@ -139,11 +139,11 @@
                             <br>
                             <button class='removeBtn' ng-click="showSymbolModalPopup(y,'Q','',x)">S</button>
                         <td>
-                        <td width="20%">
+                        <td width="20%" style="padding-bottom:40px">
                             <input type="text"
                                    ng-model='x.hint'
                                    placeholder="Hint"
-                                   style="height:19px;width:100%"/>
+                                   class="hint"/>
                         </td>
                     </tr>
                 </table>
@@ -164,7 +164,7 @@
                 <div class="col-sm-12">
                     <div class="row"ng-repeat="sol in solutionArray">
                         <table class="col-sm-6">
-                            <tr>
+                            <tr >
                                 <td width="5%" style="padding-top:15px;padding-left:10px">
                                     <button class='removeBtn' ng-click="removeSolution(sol)">X
                                     </button>
@@ -241,14 +241,14 @@
                                         </button>
                                     </td>
                                 </tr>
-                                <tr ng-repeat="x in sol.solutionRows">
+                                <tr ng-repeat="x in sol.solutionRows" ng-style="getSolutionColumnBorder($index,sol)">
                                     <td style="vertical-align: text-top;width:20%">
                                         <!--<br>-->
                                         <button ng-click="removeRow(x,sol.solutionRows)"
                                                 class='removeBtn'>X
                                         </button>
                                     </td>
-                                    <td ng-repeat="y in x.cols">
+                                    <td ng-repeat="y in x.cols" style="padding-top:15px !important">
                                         <div
                                                 ng-attr-id="{{'box'+$index+y.col1}}"
                                                 contenteditable="true"
@@ -257,14 +257,14 @@
                                                 style="text-align:center;width:50px;height:40px;border:1px solid lightgrey">
 
                                         </div>
-                                        <br>
+
                                         <button class='removeBtn'
                                                 ng-click="showSymbolModalPopup(y,'S','box'+$index+y.col1,x.row1)">S
                                         </button>
                                         <button class='removeBtn'
                                                 ng-click='showIconModalPopup("box"+$index+y.col1,y,"S",x.row1)'>I
                                         </button>
-
+                                        <br>
                                     </td>
 
                                 </tr>
@@ -291,7 +291,7 @@
                     </tr>
 
                     <tr ng-repeat='r in choices'>
-                        <td>
+                        <td >
                             <input type='text'
                                    ng-keypress="previewKeyPress($event,y)"
                                    ng-model='r.choice'>
@@ -392,7 +392,7 @@
                         <div ng-show="choiceVisibility()" id="choicesContainer">
                             <table style='width:100%'>
                                 <tr>
-                                    <td class="choiceTd" ng-repeat='r in choices'>
+                                    <td class="choiceTd" ng-repeat='r in choices' style="padding-top:5px;padding-bottom:5px">
                                         <div ng-class="getStyleObj()">
                                             <div ng-if="questionMetaData.choiceTypeSelected == 'Drag And Drop'"
                                                  class='dummy' ng-attr-id="{{'choice'+r.choice}}" style="width:36px;height:36px;background:#FC7771">
