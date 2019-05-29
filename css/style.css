@@ -169,3 +169,10 @@ input[type=text], select {
     font-size:30px;
     color:purple;text-align:center
 }
+
+.hint{
+    height:19px;
+    border: 2px solid #cdcdcd !important;
+    border-radius:0px !important;
+    width:100%;background:aliceblue
+}
