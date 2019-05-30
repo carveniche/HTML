@@ -3,15 +3,27 @@ var app = angular.module("questionBuilder",[]);
 
 app.controller("myCtrl", function ($scope,$window,$rootScope) {
     $scope.ritems = [];
+    $scope.blueImages = ['images/circle-blue.png',
+        'images/heart-blue.png','images/lego-blue.png',
+        'images/rect-blue.png', 'images/square-blue.png',
+        'images/triangle-blue.png',
+    ];
+    $scope.redImages = ['images/circle-red.png',
+        'images/heart-red.png', 'images/square-red.png',
+        'images/lego-red.png','images/rect-red.png', 'images/triangle-red.png'];
+
+    $scope.greenImages = ['images/circle-green.png','images/heart-green.png',
+        'images/triangle-green.png',
+        'images/lego-green.png', 'images/rect-green.png','images/leaf.png', 'images/square-green.png', ];
+    $scope.yellowImages = ['images/circle-yellow.png',
+        'images/heart-yellow.png',
+         'images/lego-yellow.png',
+        'images/rect-yellow.png',
+        'images/smiley.png',
+        'images/square-yellow.png', 'images/star.png',
+        'images/triangle-yellow.png']
     $scope.citems = [];
-    $scope.images = ['images/circle-blue.png',
-        'images/circle-green.png', 'images/circle-red.png', 'images/circle-yellow.png',
-        'images/heart-blue.png', 'images/heart-green.png', 'images/heart-red.png', 'images/heart-yellow.png',
-        'images/leaf.png', 'images/lego-blue.png', 'images/lego-green.png', 'images/lego-red.png', 'images/lego-yellow.png',
-        'images/rect-blue.png', 'images/rect-green.png', 'images/rect-red.png', 'images/rect-yellow.png',
-        'images/smiley.png', 'images/square-blue.png', 'images/square-green.png', 'images/square-red.png',
-        'images/square-yellow.png', 'images/star.png', 'images/triangle-blue.png', 'images/triangle-green.png',
-        'images/triangle-red.png', 'images/triangle-yellow.png'];
+    $scope.images = [];
     $scope.choices = [{choice: '', answer: '', index: 1}];
     $scope.rChoices = ['Default'];
     $scope.missedMultiSelectField = false;
@@ -621,8 +633,8 @@ app.controller("myCtrl", function ($scope,$window,$rootScope) {
         x.setAttribute("src", url);
         x.setAttribute("width", '25px');
         x.setAttribute("height", '25px');
-        x.setAttribute("padding-left",'15px');
-
+        x.setAttribute("margin-left",'30px');
+        x.style.margin = '5px';
         document.getElementById($scope.selectedElementForIcon.id).appendChild(x);
 
         if ($scope.selectedElementForIcon.type == 'S') {
@@ -1152,6 +1164,18 @@ app.controller("myCtrl", function ($scope,$window,$rootScope) {
             return false;
         }
         return true;
+    };
+    $scope.populateImages = function(type){
+        if(type == 'R'){
+            $scope.images = $scope.redImages;
+        }else if(type == 'Y'){
+            $scope.images = $scope.yellowImages;
+        }else if(type == 'G'){
+            $scope.images = $scope.greenImages;
+        }else if(type == 'B'){
+            $scope.images = $scope.blueImages;
+
+        }
     }
     $scope.init()
 
