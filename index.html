@@ -134,7 +134,9 @@
                                    ng-disabled="disbableRadioBtn(x,y)"
                                    ng-click='checkboxClick(x,y)'>
 
-                            <input ng-hide="questionMetaData.choiceTypeSelected == 'Multi Select'" type="checkbox"
+                            <input ng-hide="questionMetaData.choiceTypeSelected == 'Multi Select'"
+                                   type="checkbox"
+                                   ng-disabled="disbableRadioBtn(x,y)"
                                    ng-click='checkboxClick(x,y)' ng-checked='y.checked'/><span
                                 style="font-size:10px">Is missed ?</span>
                             <br>
@@ -467,13 +469,64 @@
                     <h5 class="modal-title" style="text-align:center;width:100%">Select Icon</h5>
                 </div>
                 <div class="modal-body">
-                    <div style='width:70%;margin:0 auto;'>
-                        <div style="float:left;margin-right:5px" ng-repeat='m in images'>
-                            <a style="cursor: pointer"><img ng-src="{{m}}" ng-click="insertImg(m)" height="35px"
-                                                            width="35px"></a>
+                    <div style='width:50%;margin:0 auto;height:80px'>
+                        <div style="float:left;margin-right:10px"
+                        ><!-- ng-repeat='m in images'-->
+                            <a style="cursor: pointer">
+                                <div class= 'imgOption'
+                                     ng-click="populateImages('R')"
+                                     style="color:red;border:2px solid red">
+                                    R
+                                </div>
+                            </a>
                         </div>
-                    </div>
+                        <div style="float:left;margin-right:10px"
+                        >
+                            <a style="cursor: pointer">
 
+                                <div class= 'imgOption'
+                                     ng-click="populateImages('Y')"
+                                     style="color:yellow;border:2px solid yellow">
+                                    Y
+                                </div>
+
+                            </a>
+                        </div>
+                        <div style="float:left;margin-right:10px"
+                        >
+                            <a style="cursor: pointer">
+
+                                <div class= 'imgOption'
+                                     ng-click="populateImages('B')"
+                                     style="color:blue;border:2px solid blue">
+                                    B
+                                </div>
+
+                            </a>
+                        </div>
+                        <div style="float:left;margin-right:5px"
+                        >
+                            <a style="cursor: pointer">
+
+                                <div class= 'imgOption'
+                                     ng-click="populateImages('G')"
+                                     style="color:green;border:2px solid green">
+                                    G
+                                </div>
+
+                            </a>
+                        </div>
+
+                    </div><br>
+                    <div style="width:50%;margin:0 auto;height:80px">
+                        <div style="float:left;margin-right:10px"
+                        ng-repeat='m in images'
+                        >
+                            <a style="cursor: pointer">
+                                <img ng-src="{{m}}" ng-click="insertImg(m)" height="35px"
+                                                            width="35px">
+                            </a>
+                        </div>
                 </div>
 
             </div>
