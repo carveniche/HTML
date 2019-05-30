@@ -131,6 +131,7 @@
                                    name="multiselect"
                                    type="radio"
                                    ng-checked="y.checked"
+                                   ng-disabled="disbableRadioBtn(x,y)"
                                    ng-click='checkboxClick(x,y)'>
 
                             <input ng-hide="questionMetaData.choiceTypeSelected == 'Multi Select'" type="checkbox"
@@ -222,7 +223,9 @@
                                                     ng-attr-id="{{'line'+$index}}"
                                                     ng-keypress="limitKeypress($event,s,'',sol,'line'+$index)"
                                                     style="width:90% !important;height:40px !important;"
-                                                    >
+                                                    ng-keydown ="testFunc($event,s,'','line'+$index,'M')"
+
+                                            >
                                             </div>
                                         </td>
                                     </tr>
@@ -250,10 +253,11 @@
                                     </td>
                                     <td ng-repeat="y in x.cols" style="padding-top:15px !important">
                                         <div
+
                                                 ng-attr-id="{{'box'+$index+y.col1}}"
                                                 contenteditable="true"
                                                 ng-keypress="limitKeypress($event,y,x,sol)"
-                                                ng-keydown ="testFunc($event,y,x,'box'+$index+y.col1)"
+                                                ng-keydown ="testFunc($event,y,x,'box'+$index+y.col1,'S')"
                                                 style="text-align:center;width:50px;height:40px;border:1px solid lightgrey">
 
                                         </div>
@@ -261,9 +265,7 @@
                                         <button class='removeBtn'
                                                 ng-click="showSymbolModalPopup(y,'S','box'+$index+y.col1,x.row1)">S
                                         </button>
-                                        <button class='removeBtn'
-                                                ng-click='showIconModalPopup("box"+$index+y.col1,y,"S",x.row1)'>I
-                                        </button>
+
                                         <br>
                                     </td>
 
@@ -351,6 +353,7 @@
                                                ng-model="y.answer"
                                                ng-attr-id="{{y.value}}"
                                                class="emptyBox"
+                                               ng-disabled = "disableFillTextBox"
                                                ng-keypress="previewKeyPress($event,y)"
                                                />
                                         <input span
