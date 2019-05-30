@@ -1,7 +1,7 @@
 var app = angular.module("questionBuilder",[]);
 
 
-app.controller("myCtrl", function ($scope,$window) {
+app.controller("myCtrl", function ($scope,$window,$rootScope) {
     $scope.ritems = [];
     $scope.citems = [];
     $scope.images = ['images/circle-blue.png',
@@ -41,7 +41,7 @@ app.controller("myCtrl", function ($scope,$window) {
     $scope.showModelSolutionContent = false;
     $scope.showSidebysideSolutionContent = false;
     $scope.editMode = false;
-
+    $scope.disableFillTextBox = false;
     function isEmpty(obj) {
         for(var key in obj) {
             if(obj.hasOwnProperty(key))
@@ -75,6 +75,8 @@ app.controller("myCtrl", function ($scope,$window) {
 
         }
         ;
+        $scope.populatingModelSolution();
+
         $scope.solutionArray.forEach(function (obj) {
             if (obj.solutionType == 'Model') {
                 $scope.dataObj.modelSolutionContent = obj;
@@ -198,7 +200,11 @@ app.controller("myCtrl", function ($scope,$window) {
         var col = found.cols.find(function (ele) {
             return ele.col1 == idx.col1
         });
-        col.checked = col.checked == true ? false : true;
+        if(col.checked){
+            return;
+        }else{
+            col.checked = true;
+        }
         if (col.checked) {
             var isValueEmpty = $scope.choices.find(function (element) {
                 return element.choice == '';
@@ -225,6 +231,13 @@ app.controller("myCtrl", function ($scope,$window) {
 
         }
         ;
+        var addChoiceIdx = $scope.choices.findIndex(function(ch){
+            return(ch.index == 1);
+        });
+
+        if(addChoiceIdx==-1){
+            $scope.choices.unshift({choice: '', answer: '', index: 1});
+        };
 
     };
     $scope.removeRow = function (obj, dataArray) {
@@ -267,6 +280,18 @@ app.controller("myCtrl", function ($scope,$window) {
         titleBody += $scope.questionMetaData.title;
         titleBody += '</div>';
         $('#questionName').html(titleBody);
+    };
+    $scope.populatingModelSolution = function(){
+        var obj = $scope.solutionArray.find(function(sol){
+            return (sol.solutionType == "Model")
+        });
+
+        if(obj){
+            obj.solutionContent.forEach(function(sol){
+                var id = 'line'+sol.line;
+                sol.value = document.getElementById(id).innerHTML
+            })
+        }
     };
     $scope.validationCheck = function () {
 
@@ -556,6 +581,7 @@ app.controller("myCtrl", function ($scope,$window) {
                             data.value = str;
                             var e = document.getElementById('line' + $scope.selectedColForSymbol.line);
                             e.innerHTML = str;
+                            $("#line" + $scope.selectedColForSymbol.line).focus();
                         }
                     })
                 }
@@ -595,6 +621,8 @@ app.controller("myCtrl", function ($scope,$window) {
         x.setAttribute("src", url);
         x.setAttribute("width", '25px');
         x.setAttribute("height", '25px');
+        x.setAttribute("padding-left",'15px');
+
         document.getElementById($scope.selectedElementForIcon.id).appendChild(x);
 
         if ($scope.selectedElementForIcon.type == 'S') {
@@ -620,13 +648,15 @@ app.controller("myCtrl", function ($scope,$window) {
                         if (data.line == $scope.selectedElementForIcon.line) {
                             var str = $("#line" + $scope.selectedElementForIcon.line).html();
                             data.value = str;
+                            $("#line" + $scope.selectedElementForIcon.line).focus();
+
                         }
                     })
                 }
             })
         }
 
-        $('#iconModal').modal('hide');
+        //$('#iconModal').modal('hide');
     };
     $scope.onSubmit = function () {
         //Final data Object
@@ -811,6 +841,7 @@ app.controller("myCtrl", function ($scope,$window) {
                 $scope.showSidebysideSolutionContent = true;
             }
             document.getElementById('choicesContainer').style.display = "none";
+            $scope.disableFillTextBox = true;
 
         } else {
             alert('Answer is correct');
@@ -854,6 +885,18 @@ app.controller("myCtrl", function ($scope,$window) {
         ;
         return false;
     };
+    $scope.disbableRadioBtn = function(row,col){
+        if ($scope.questionMetaData.multiplicationType == 'Vertical') {
+            if ((col.col1 == "0-0")) {
+                return true;
+            }
+        }
+        ;
+        if(col.value == ""){
+            return true;
+        };
+        return false;
+    }
     $scope.removeSolutionCol = function (idx, array) {
         array.solutionRows.forEach(function (row) {
             row.cols.splice(idx, 1);
@@ -1046,7 +1089,6 @@ app.controller("myCtrl", function ($scope,$window) {
         }
 
     };
-
     $scope.removeSolution = function(sol){
         var idx = $scope.solutionArray.findIndex(function(ob){
             return(ob.solutionType == sol.solutionType)
@@ -1066,27 +1108,29 @@ app.controller("myCtrl", function ($scope,$window) {
             sol.solutionContent = [];
         }
     };
-    $scope.testFunc = function(event,cols,row,id){
+    $scope.testFunc = function(event,cols,row,id,type){
         var KeyID = event.keyCode;
         switch(KeyID)
         {
             case 8:
             case 46:
-                var obj = $scope.solutionArray.find(function(sol){
-                    return (sol.solutionType == "Side By Side")
-                });
-                obj.solutionRows.forEach(function (elemrow) {
-                    if (elemrow.row1 == row.row1) {
-                        elemrow.cols.forEach(function (elemcol) {
-                            if (elemcol.col1 == cols.col1) {
-                                elemcol.value = document.getElementById(id).innerHTML;
-                                elemcol.value = elemcol.value.trim().substring(0,elemcol.value.trim().length-1);
-                                elemcol.type = 'text';
-                            }
-                        })
-                    }
+                if(type == 'S'){
+                    var obj = $scope.solutionArray.find(function(sol){
+                        return (sol.solutionType == "Side By Side")
+                    });
+                    obj.solutionRows.forEach(function (elemrow) {
+                        if (elemrow.row1 == row.row1) {
+                            elemrow.cols.forEach(function (elemcol) {
+                                if (elemcol.col1 == cols.col1) {
+                                    elemcol.value = document.getElementById(id).innerHTML;
+                                    elemcol.value = elemcol.value.trim().substring(0,elemcol.value.trim().length-1);
+                                    elemcol.type = 'text';
+                                }
+                            })
+                        }
 
-                })
+                    })
+                }
 
                 break;
             default:
