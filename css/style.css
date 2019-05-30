@@ -176,3 +176,11 @@ input[type=text], select {
     border-radius:0px !important;
     width:100%;background:aliceblue
 }
+.imgOption{
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    padding-top: 10px;
+    font-weight: bold;
+    font-size: 20px;
+}
